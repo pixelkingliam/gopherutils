@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/term"
+	gquery "gopherutils/shared"
 	"os"
 	"slices"
 )
@@ -11,8 +12,9 @@ import (
 func main() {
 	//goland:noinspection ALL
 	var options struct {
-		NoColor bool `short:"c" long:"nocolors" description:"Render results with colors"`
-		List    bool `short:"l" long:"long" description:"Use long list."`
+		NoColor   bool `short:"c" long:"nocolors" description:"Render results with colors"`
+		List      bool `short:"l" long:"long" description:"Use long list."`
+		SortByLen bool `short:"s" long:"sortlen" description:"QuickSortLen using string length instead of alphabetical sorting."`
 	}
 
 	dir := "."
@@ -53,17 +55,19 @@ func main() {
 	for i := 0; i < len(dirs); i++ {
 		dirs[i] = starting + dirs[i] + ending
 	}
-
-	if !options.NoColor {
-		dirs[0] = "\033[38;5;75m" + dirs[0]
-		dirs[len(dirs)-1] = dirs[len(dirs)-1] + "\033[0m"
-	}
-
-	entries := slices.Concat(dirs, files)
 	if !term.IsTerminal(int(os.Stdin.Fd())) || options.List {
-		for i := 0; i < len(entries); i++ {
-			fmt.Println(entries[i])
+		if options.SortByLen {
+			entries := slices.Concat(gquery.QuickSortLen(dirs), gquery.QuickSortLen(files))
+			for i := 0; i < len(entries); i++ {
+				fmt.Println(entries[i])
+			}
+		} else {
+			entries := slices.Concat(dirs, files)
+			for i := 0; i < len(entries); i++ {
+				fmt.Println(entries[i])
+			}
 		}
+
 		os.Exit(0)
 	}
 

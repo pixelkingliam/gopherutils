@@ -16,7 +16,7 @@
 
 # Go workspace file
 go.work
-
+.idea
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
