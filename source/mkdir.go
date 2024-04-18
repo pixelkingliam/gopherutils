@@ -9,8 +9,9 @@ import (
 func main() {
 	var options struct {
 		Parents bool `short:"p" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."`
+		Mode    int  `short:"m" long:"mode" description:"Set file mode (numerical representation)"`
 	}
-
+	options.Mode = 0755
 	args, err := flags.ParseArgs(&options, os.Args)
 	if err != nil {
 		fmt.Println(`Unexpected error:`, err.Error())
@@ -21,9 +22,9 @@ func main() {
 	}
 	dir := args[0]
 	if options.Parents {
-		err = os.MkdirAll(dir, 0755)
+		err = os.MkdirAll(dir, os.FileMode(options.Mode))
 	} else {
-		err = os.Mkdir(dir, 0755)
+		err = os.Mkdir(dir, os.FileMode(options.Mode))
 	}
 	if err != nil {
 		fmt.Println(`Unexpected error:`, err.Error())
