@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/term"
-	gquery "gopherutils/shared"
+	"gopherutils/shared/ansi"
+	"gopherutils/shared/gquery"
 	"os"
 	"slices"
 )
@@ -48,8 +49,8 @@ func main() {
 	starting := ""
 	ending := "/"
 	if !options.NoColor {
-		starting = "\033[38;5;75m"
-		ending += "\033[0m"
+		starting = ansi.BlueFG
+		ending += ansi.ResetColor
 	}
 
 	for i := 0; i < len(dirs); i++ {
@@ -57,7 +58,7 @@ func main() {
 	}
 	if !term.IsTerminal(int(os.Stdin.Fd())) || options.List {
 		if options.SortByLen {
-			entries := slices.Concat(gquery.QuickSortLen(dirs), gquery.QuickSortLen(files))
+			entries := slices.Concat(gquery.Reverse(gquery.QuickSortLen(dirs)), gquery.Reverse(gquery.QuickSortLen(files)))
 			for i := 0; i < len(entries); i++ {
 				fmt.Println(entries[i])
 			}

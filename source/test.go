@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	gquery "gopherutils/shared"
+	"gopherutils/shared/ansi"
+	"gopherutils/shared/gquery"
 	"slices"
 )
 
@@ -10,54 +11,51 @@ func main() {
 
 	fmt.Println("[ TESTING ] => gquery")
 	var gqueryResults []bool
-	const green = "\033[38;5;2m"
-	const red = "\033[38;5;1m"
-	const clearColor = "\033[0m"
 
 	// Testing Reverse
 	result := testReverse()
 	if result {
-		fmt.Println(green+"[ TEST PASSED ]"+clearColor, "=> gquery.Reverse[T comparable](slice []T) []T")
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.Reverse[T comparable](slice []T) []T")
 	} else {
-		fmt.Println(red+"[ TEST FAILED ]"+clearColor, "=> gquery.Reverse[T comparable](slice []T) []T")
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.Reverse[T comparable](slice []T) []T")
 	}
 	// Testing RemoveAt
 	result = testRemoveAt()
 	if result {
-		fmt.Println(green+"[ TEST PASSED ]"+clearColor, "=> gquery.RemoveAt[T comparable](slice []T, index int) []T")
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.RemoveAt[T comparable](slice []T, index int) []T")
 	} else {
-		fmt.Println(red+"[ TEST FAILED ]"+clearColor, "=> gquery.RemoveAt[T comparable](slice []T, index int) []T")
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.RemoveAt[T comparable](slice []T, index int) []T")
 	}
 	gqueryResults = append(gqueryResults, result)
 	// Testing Swap
 	result = testSwap()
 	if result {
-		fmt.Println(green+"[ TEST PASSED ]"+clearColor, "=> gquery.Swap[T any](slice []T, a int, b int) []T")
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.Swap[T any](slice []T, a int, b int) []T")
 	} else {
-		fmt.Println(red+"[ TEST FAILED ]"+clearColor, "=> gquery.Swap[T any](slice []T, a int, b int) []T")
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.Swap[T any](slice []T, a int, b int) []T")
 	}
 	gqueryResults = append(gqueryResults, result)
 	// Testing QuickSortLen
 	result = testQuick()
 	if result {
-		fmt.Println(green+"[ TEST PASSED ]"+clearColor, "=> gquery.QuickSortLen(slice []string, pivot int) []string")
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.QuickSortLen(slice []string, pivot int) []string")
 	} else {
-		fmt.Println(red+"[ TEST FAILED ]"+clearColor, "=> gquery.QuickSortLen(slice []string, pivot int) []string")
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.QuickSortLen(slice []string, pivot int) []string")
 	}
 	gqueryResults = append(gqueryResults, result)
 	// Testing All
 	result = testAll()
 	if result {
-		fmt.Println(green+"[ TEST PASSED ]"+clearColor, "=> gquery.All[T comparable](slice []T, value T) int")
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, value T) int")
 	} else {
-		fmt.Println(red+"[ TEST FAILED ]"+clearColor, "=> gquery.All[T comparable](slice []T, value T) int")
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, value T) int")
 	}
 	gqueryResults = append(gqueryResults, result)
 	failures := gquery.All(gqueryResults, false)
 	if failures == 0 {
-		fmt.Println(green+"[ ALL TESTS PASS ]"+clearColor, "=> gquery")
+		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> gquery")
 	} else {
-		fmt.Println(red+"[", failures, "TESTS FAILED]"+clearColor, "=> gquery")
+		fmt.Println(ansi.RedFG+"[", failures, "TESTS FAILED]"+ansi.ResetColor, "=> gquery")
 
 	}
 }
