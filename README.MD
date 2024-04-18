@@ -109,7 +109,7 @@ See `LICENSE`
 
 * `mkdir`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
