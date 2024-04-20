@@ -1,6 +1,7 @@
 package gquery
 
 import (
+	"github.com/adnsv/go-markout/wcwidth"
 	"slices"
 )
 
@@ -28,7 +29,7 @@ func BiggestString(slice []string) int {
 	biggestIndex := 0
 
 	for i := 0; i < len(slice); i++ {
-		if len(slice[biggestIndex]) < len(slice[i]) {
+		if wcwidth.StringCells(slice[biggestIndex]) < wcwidth.StringCells(slice[i]) {
 			biggestIndex = i
 		}
 	}
