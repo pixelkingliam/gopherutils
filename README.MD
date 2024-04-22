@@ -24,14 +24,6 @@ See `LICENSE`
 
 ## List of programs
 
-* `chcon`
-
-  ❌ Basic functionality
-
-  ❌ Advanced functionality
-
-  ❌ GNU Compatibility
-
 * `chgrp`
 
   ❌ Basic functionality
@@ -102,8 +94,8 @@ See `LICENSE`
 
   ✔️ Basic functionality
 
-  ❌ Advanced functionality
-    * Compact list rendering
+  ❌ Advanced functionality 
+   * ✔️ Compact list rendering
 
   ❌ GNU Compatibility
 
