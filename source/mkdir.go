@@ -13,6 +13,7 @@ func main() {
 	}
 	options.Mode = 0755
 	args, err := flags.ParseArgs(&options, os.Args)
+	args = args[1:]
 	if err != nil {
 		os.Exit(0)
 	}
