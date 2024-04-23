@@ -87,8 +87,7 @@ func main() {
 				bigString = files[gquery.BiggestString(files)]
 			}
 		}
-
-		columns := (width) / wcwidth.StringCells(bigString)
+		columns := (width - totalLen) / wcwidth.StringCells(bigString)
 		rows := (totalLen + columns - 1) / columns
 		if rows == 1 && columns > totalLen {
 			columns = totalLen
@@ -109,7 +108,6 @@ func main() {
 			val = val + strings.Repeat(" ", wcwidth.StringCells(bigString)-wcwidth.StringCells(val))
 			finals = append(finals, val)
 		}
-		fmt.Println("BIG STRING IS", bigString)
 		// Top line
 
 		fmt.Print("┏")
