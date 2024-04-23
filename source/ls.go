@@ -16,9 +16,9 @@ import (
 func main() {
 	//goland:noinspection ALL
 	var options struct {
-		NoColor   bool `short:"c" long:"nocolors" description:"Render results with ansi"`
-		List      bool `short:"l" long:"long" description:"Use long list."`
-		SortByLen bool `short:"s" long:"sortlen" description:"QuickSortLen using string length instead of alphabetical sorting."`
+		NoColor   bool `short:"c" long:"nocolors" description:"Render results with ansi"`                                         // GNU Incompatible
+		List      bool `short:"l" long:"long" description:"Use long list."`                                                       // GNU Compatible
+		SortByLen bool `short:"s" long:"sortlen" description:"QuickSortLen using string length instead of alphabetical sorting."` // GNU Incompatible
 	}
 
 	dir := "."

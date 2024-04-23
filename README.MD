@@ -148,13 +148,6 @@ See `LICENSE`
   ❌ Advanced functionality
 
   ❌ GNU Compatibility
-* `rm`
-
-  ❌ Basic functionality
-
-  ❌ Advanced functionality
-
-  ❌ GNU Compatibility
 * `rmdir`
 
   ❌ Basic functionality

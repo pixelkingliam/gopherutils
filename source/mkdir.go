@@ -8,8 +8,8 @@ import (
 
 func main() {
 	var options struct {
-		Parents bool `short:"p" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."`
-		Mode    int  `short:"m" long:"mode" description:"Set file mode (numerical representation)" default:"0755"`
+		Parents bool `short:"p" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
+		Mode    int  `short:"m" long:"mode" description:"Set file mode (numerical representation)" default:"0755"`                        // GNU Compatible
 	}
 	options.Mode = 0755
 	args, err := flags.ParseArgs(&options, os.Args)
