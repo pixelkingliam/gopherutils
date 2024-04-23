@@ -49,7 +49,6 @@ func main() {
 	}
 	slices.Sort(dirs)
 	slices.Sort(files)
-
 	starting := ""
 	ending := ""
 	if !options.NoColor {
@@ -81,9 +80,12 @@ func main() {
 		if err != nil {
 			return
 		}
-		bigString := dirs[gquery.BiggestString(dirs)]
-		if wcwidth.StringCells(bigString) < wcwidth.StringCells(files[gquery.BiggestString(files)]) {
-			bigString = files[gquery.BiggestString(files)]
+		bigString := dirs[gquery.BiggestString(dirs)] + "/"
+		if len(files) != 0 {
+			if wcwidth.StringCells(bigString) < wcwidth.StringCells(files[gquery.BiggestString(files)]) {
+
+				bigString = files[gquery.BiggestString(files)]
+			}
 		}
 
 		columns := (width) / wcwidth.StringCells(bigString)
@@ -91,7 +93,6 @@ func main() {
 		if rows == 1 && columns > totalLen {
 			columns = totalLen
 		}
-
 		// Add padding to all entries
 		var finals []string
 		for i := 0; i < len(dirs); i++ {
@@ -108,13 +109,6 @@ func main() {
 			val = val + strings.Repeat(" ", wcwidth.StringCells(bigString)-wcwidth.StringCells(val))
 			finals = append(finals, val)
 		}
-		//for _, final := range finals {
-		//
-		//	fmt.Println(final, "|")
-		//	//for _, runeValue := range final {
-		//	//	fmt.Printf("%U '%c'\n", runeValue, runeValue)
-		//	//}
-		//}
 		fmt.Println("BIG STRING IS", bigString)
 		// Top line
 
@@ -156,8 +150,7 @@ func main() {
 			}
 		}
 		fmt.Print("┛\n")
-		fmt.Println(rows, columns)
-		fmt.Println(totalLen, width)
+
 	}
 
 }

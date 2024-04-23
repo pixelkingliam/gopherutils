@@ -27,7 +27,9 @@ func Reverse[T comparable](slice []T) []T {
 }
 func BiggestString(slice []string) int {
 	biggestIndex := 0
-
+	if len(slice) == 0 {
+		return biggestIndex
+	}
 	for i := 0; i < len(slice); i++ {
 		if wcwidth.StringCells(slice[biggestIndex]) < wcwidth.StringCells(slice[i]) {
 			biggestIndex = i
