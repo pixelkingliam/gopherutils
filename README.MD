@@ -14,7 +14,7 @@ Testing is done via the test.go program. Near the end of the project it will be 
 
 ## Why
 
-It's open source, and it's rather simple to work on, try to make it a bit less bloated then coreutils where possible.
+It's open source, and it's rather simple to work on and it tries to limit bloat where reasonable.
 
 ## Licensing
 
@@ -129,7 +129,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `mv`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
