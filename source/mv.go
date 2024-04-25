@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"golang.org/x/term"
 	"io"
 	"os"
 )
@@ -14,7 +16,6 @@ func main() {
 		ForceOverwrite bool `short:"f" long:"force" description:"Do not prompt before overwriting files."`   // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
-	args = args[1:]
 	if err != nil {
 		if errors.Is(err, flags.ErrHelp) {
 			os.Exit(0)
@@ -22,6 +23,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	args = args[1:]
 	if len(args) == 0 {
 		fmt.Println("Missing file operand.")
 		os.Exit(1)
@@ -40,6 +42,20 @@ func main() {
 			}
 
 			os.Exit(1)
+		}
+		_, err = os.Stat(args[1])
+		if err == nil && term.IsTerminal(int(os.Stdin.Fd())) && !options.ForceOverwrite {
+			if options.NoOverwrite {
+				fmt.Printf("File '%s' already exists!\n", args[1])
+				os.Exit(1)
+			}
+			fmt.Printf("File '%s' already exists! Overwrite? [Y/n]\n", args[1])
+			reader := bufio.NewReader(os.Stdin)
+
+			res, resSize, _ := reader.ReadRune()
+			if !(resSize != 0 && (res == 'y' || res == 'Y')) {
+				os.Exit(0)
+			}
 		}
 		dest, err := os.Create(args[1])
 		if err != nil {
@@ -69,9 +85,5 @@ func main() {
 		os.Exit(0)
 
 	}
-
-	// TODO Multiple moves
-	dest := args[len(args)-1]
-	fmt.Println(dest)
 
 }
