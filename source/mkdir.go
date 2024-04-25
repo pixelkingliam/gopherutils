@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"os"
@@ -15,7 +16,11 @@ func main() {
 	args, err := flags.ParseArgs(&options, os.Args)
 	args = args[1:]
 	if err != nil {
-		os.Exit(0)
+		if errors.Is(err, flags.ErrHelp) {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
 	}
 	if len(args) == 0 {
 		fmt.Println("Missing operand.")

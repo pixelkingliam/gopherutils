@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/adnsv/go-markout/wcwidth"
 	"github.com/jessevdk/go-flags"
@@ -25,8 +26,11 @@ func main() {
 	args, err := flags.ParseArgs(&options, os.Args)
 
 	if err != nil {
-		println(err.Error())
-		os.Exit(1)
+		if errors.Is(err, flags.ErrHelp) {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
 	}
 
 	if len(args) > 1 {
@@ -152,14 +156,3 @@ func main() {
 	}
 
 }
-
-//for _, entry := range entries {
-//	stringLen := len(ansi.StripANSI(entry))
-//
-//	padding := bigStringLen - stringLen
-//	if padding < 0 {
-//		padding = 0
-//	}
-//
-//	finals = append(finals, entry+strings.Repeat(" ", padding))
-//}
