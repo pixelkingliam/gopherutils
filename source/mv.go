@@ -94,5 +94,68 @@ func main() {
 		os.Exit(0)
 
 	}
+	destination := args[len(args)-1]
+	stat, err := os.Stat(destination)
+	if !stat.IsDir() {
+		fmt.Println("Output is not a directory! Consider using only 2 operands.")
+		os.Exit(1)
+	}
+	if len(args[1]) != '/' {
+		destination = destination + "/"
+	}
+	for i := 0; i < len(args)-1; i++ {
+		src, err := os.Open(args[i])
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				fmt.Printf("Cannot open `%s`: No such file or directory\n", args[i])
+			} else {
+				fmt.Println(err.Error())
+			}
 
+			os.Exit(1)
+		}
+
+		tmpDest := destination + path.Base(args[i])
+
+		stat, err := os.Stat(tmpDest)
+		if err == nil && term.IsTerminal(int(os.Stdin.Fd())) && !options.ForceOverwrite {
+			if options.NoOverwrite {
+				fmt.Printf("File '%s' already exists!\n", tmpDest)
+				os.Exit(1)
+			}
+			fmt.Printf("File '%s' already exists! Overwrite? [Y/n]\n", tmpDest)
+			reader := bufio.NewReader(os.Stdin)
+
+			res, resSize, _ := reader.ReadRune()
+			if !(resSize != 0 && (res == 'y' || res == 'Y')) {
+				os.Exit(0)
+			}
+		}
+		dest, err := os.Create(tmpDest)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		_, err = io.Copy(dest, src)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		stat, err = os.Stat(args[i])
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		err = os.Chmod(tmpDest, stat.Mode())
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		err = os.Remove(args[i])
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		fmt.Printf("Moved %s into %s\n", args[i], destination)
+	}
 }
