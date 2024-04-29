@@ -8,6 +8,7 @@ import (
 	"golang.org/x/term"
 	"io"
 	"os"
+	"path"
 )
 
 func main() {
@@ -43,7 +44,15 @@ func main() {
 
 			os.Exit(1)
 		}
-		_, err = os.Stat(args[1])
+
+		stat, err := os.Stat(args[1])
+		if stat.IsDir() {
+			if len(args[1]) != '/' {
+				args[1] = args[1] + "/"
+			}
+			args[1] = args[1] + path.Base(args[0])
+		}
+		stat, err = os.Stat(args[1])
 		if err == nil && term.IsTerminal(int(os.Stdin.Fd())) && !options.ForceOverwrite {
 			if options.NoOverwrite {
 				fmt.Printf("File '%s' already exists!\n", args[1])
@@ -67,7 +76,7 @@ func main() {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		stat, err := os.Stat(args[0])
+		stat, err = os.Stat(args[0])
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
