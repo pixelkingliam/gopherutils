@@ -402,11 +402,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `basename`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `chroot`
 
   ❌ Basic functionality
