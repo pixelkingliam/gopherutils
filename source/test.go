@@ -51,6 +51,21 @@ func main() {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, value T) int")
 	}
 	gqueryResults = append(gqueryResults, result)
+	// Testing EndsWith
+	result = testEndsWith()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.EndsWith(str string, compare string) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.EndsWith(str string, compare string) bool")
+	}
+	// Testing StartsWith
+	result = testStartsWith()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.StartsWith(str string, compare string) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.StartsWith(str string, compare string) bool")
+	}
+	gqueryResults = append(gqueryResults, result)
 	failures := gquery.All(gqueryResults, false)
 	if failures == 0 {
 		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> gquery")
@@ -83,4 +98,10 @@ func testAll() bool {
 	mySlice := []string{"hi", "hi", "hell", "process", "x", "one", "wateracup", "bottle", "fiver"}
 	result := gquery.All(mySlice, "hi")
 	return result == 2
+}
+func testEndsWith() bool {
+	return gquery.EndsWith("word_letter_number", "number")
+}
+func testStartsWith() bool {
+	return gquery.StartsWith("word_letter_number", "word")
 }
