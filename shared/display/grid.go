@@ -1,14 +1,18 @@
 package display
 
 import (
-	"fmt"
+	"errors"
 	"github.com/adnsv/go-markout/wcwidth"
 	"gopherutils/shared/gquery"
 	"strings"
 )
 
-func DrawBoxGrid(gridData []string, gridWidth int) {
+func DrawBoxGrid(gridData []string, gridWidth int) (string, error) {
 
+	if gridWidth <= 3 {
+		return "", errors.New("int smaller then 3")
+	}
+	var finalString string
 	bigString := gridData[gquery.BiggestString(gridData)]
 	columns := (gridWidth - len(gridData)) / wcwidth.StringCells(bigString)
 	rows := (len(gridData) + columns - 1) / columns
@@ -25,48 +29,52 @@ func DrawBoxGrid(gridData []string, gridWidth int) {
 	}
 	// Top line
 
-	fmt.Print("┏")
+	finalString += "┏"
 	for i := 0; i < columns; i++ {
 		for j := 0; j < wcwidth.StringCells(bigString); j++ {
-			fmt.Print("━")
+			finalString += "━"
 		}
 
 		if i < columns-1 {
-			fmt.Print("┳")
+			finalString += "┳"
 		}
 	}
 
-	fmt.Print("┓\n")
+	finalString += "┓\n"
 	// Draw entries
 	i := 0
 	for x := 0; x < rows; x++ {
-		fmt.Print("┃")
+		finalString += "┃"
 		for y := 0; y < columns; y++ {
 			if i >= len(finals) {
-				fmt.Print(strings.Repeat(" ", wcwidth.StringCells(bigString)) + "┃") // Fill empty cells with spaces
+				finalString += strings.Repeat(" ", wcwidth.StringCells(bigString)) + "┃" // Fill empty cells with spaces
 				continue
 			}
-			fmt.Print(finals[i])
+			finalString += finals[i]
 			i++
-			fmt.Print("┃")
+			finalString += "┃"
 		}
-		fmt.Println()
+		finalString += "\n"
 	}
 	// Bottom line
-	fmt.Print("┗")
+	finalString += "┗"
 	for i := 0; i < columns; i++ {
 		for j := 0; j < wcwidth.StringCells(bigString); j++ {
-			fmt.Print("━")
+			finalString += "━"
 		}
 		if i < columns-1 {
-			fmt.Print("┻")
+			finalString += "┻"
 		}
 	}
-	fmt.Print("┛\n")
-
+	finalString += "┛"
+	return finalString, nil
 }
 
-func DrawTabGrid(gridData []string, gridWidth int) {
+func DrawTabGrid(gridData []string, gridWidth int) (string, error) {
+	if gridWidth <= 0 {
+		return "", errors.New("int smaller then 3")
+	}
+	var finalString string
 	bigString := gridData[gquery.BiggestString(gridData)]
 	columns := (gridWidth - len(gridData)) / wcwidth.StringCells(bigString)
 	rows := (len(gridData) + columns - 2) / columns
@@ -87,14 +95,15 @@ func DrawTabGrid(gridData []string, gridWidth int) {
 	for x := 0; x < rows; x++ {
 		for y := 0; y < columns; y++ {
 			if i >= len(finals) {
-				fmt.Print(strings.Repeat(" ", wcwidth.StringCells(bigString)) + " ") // Fill empty cells with spaces
+				finalString += strings.Repeat(" ", wcwidth.StringCells(bigString)) + " " // Fill empty cells with spaces
 				continue
 			}
-			fmt.Print(finals[i])
-			fmt.Print(" ")
+			finalString += finals[i]
+			finalString += " "
 			i++
 		}
-		fmt.Println()
+		finalString += "\n"
 	}
+	return finalString, nil
 
 }
