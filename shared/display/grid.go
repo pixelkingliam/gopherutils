@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func DrawBoxGrid(gridData []string, gridWidth int) (string, error) {
+func DynamicBoxGrid(gridData []string, gridWidth int) (string, error) {
 
 	if gridWidth <= 3 {
 		return "", errors.New("int smaller then 3")
@@ -69,8 +69,7 @@ func DrawBoxGrid(gridData []string, gridWidth int) (string, error) {
 	finalString += "┛"
 	return finalString, nil
 }
-
-func DrawTabGrid(gridData []string, gridWidth int) (string, error) {
+func DynamicTabGrid(gridData []string, gridWidth int) (string, error) {
 	if gridWidth <= 0 {
 		return "", errors.New("int smaller then 3")
 	}
@@ -106,4 +105,125 @@ func DrawTabGrid(gridData []string, gridWidth int) (string, error) {
 	}
 	return finalString, nil
 
+}
+func StaticBoxGrid(gridData [][]string, options ...bool) (string, error) {
+	header := false // Default value
+	if len(options) > 0 {
+		header = true
+	}
+
+	fields := 0
+	for x := 0; x < len(gridData); x++ {
+		val := len(gridData[x])
+		if val > fields {
+			fields = len(gridData[x])
+		}
+	}
+	if fields == 0 {
+		return "", errors.New("table contains no columns")
+	}
+	if len(gridData) == 0 {
+		return "", errors.New("table contains no rows")
+	}
+
+	biggestFields := make([]string, fields)
+	for x := 0; x < len(gridData); x++ {
+		for i := 0; i < len(biggestFields); i++ {
+			if wcwidth.StringCells(biggestFields[i]) < wcwidth.StringCells(gridData[x][i]) {
+				biggestFields[i] = gridData[x][i]
+			}
+		}
+	}
+	// Top line
+
+	finalString := "┏"
+	for i := 0; i < fields; i++ {
+		for j := 0; j < wcwidth.StringCells(biggestFields[i]); j++ {
+			finalString += "━"
+		}
+
+		if i < fields-1 {
+			finalString += "┳"
+		}
+	}
+
+	finalString += "┓\n"
+	// Draw entries
+
+	for x := 0; x < len(gridData); x++ {
+		finalString += "┃"
+		for y := 0; y < fields; y++ {
+			finalString += gridData[x][y] + strings.Repeat(" ", wcwidth.StringCells(biggestFields[y])-wcwidth.StringCells(gridData[x][y])) + "┃" // Fill empty cells with spaces continue
+		}
+		finalString += "\n"
+		if header && x == 0 {
+			finalString += "┣"
+			for i := 0; i < fields; i++ {
+				for j := 0; j < wcwidth.StringCells(biggestFields[i]); j++ {
+					finalString += "━"
+				}
+
+				if i < fields-1 {
+					finalString += "╋"
+				}
+			}
+
+			finalString += "┫\n"
+		}
+
+	}
+
+	// Bottom line
+
+	finalString += "┗"
+	for i := 0; i < fields; i++ {
+		for j := 0; j < wcwidth.StringCells(biggestFields[i]); j++ {
+			finalString += "━"
+		}
+
+		if i < fields-1 {
+			finalString += "┻"
+		}
+	}
+
+	finalString += "┛"
+
+	return finalString, nil
+}
+func StaticTabGrid(gridData [][]string) (string, error) {
+	fields := 0
+	for x := 0; x < len(gridData); x++ {
+		val := len(gridData[x])
+		if val > fields {
+			fields = len(gridData[x])
+		}
+	}
+	if fields == 0 {
+		return "", errors.New("table contains no columns")
+	}
+	if len(gridData) == 0 {
+		return "", errors.New("table contains no rows")
+	}
+
+	biggestFields := make([]string, fields)
+	for x := 0; x < len(gridData); x++ {
+		for i := 0; i < len(biggestFields); i++ {
+			if wcwidth.StringCells(biggestFields[i]) < wcwidth.StringCells(gridData[x][i]) {
+				biggestFields[i] = gridData[x][i]
+			}
+		}
+	}
+	finalString := ""
+	// Draw entries
+
+	for x := 0; x < len(gridData); x++ {
+		finalString += " "
+		for y := 0; y < fields; y++ {
+			finalString += gridData[x][y] + strings.Repeat(" ", wcwidth.StringCells(biggestFields[y])-wcwidth.StringCells(gridData[x][y])) + " " // Fill empty cells with spaces continue
+		}
+		finalString += "\n"
+
+	}
+
+	return finalString, nil
 }
