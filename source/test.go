@@ -103,7 +103,7 @@ func main() {
 	}
 	displayResults = append(displayResults, result)
 	// Testing StaticTabGrid
-	result = testStaticBoxGrid()
+	result = testStaticTabGrid()
 	if result {
 		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> display.StaticTabGrid(gridData [][]string) (string, error)")
 	} else {
@@ -271,16 +271,10 @@ func testStaticBoxGrid() bool {
 ┃Emma Martinez  ┃26 ┃emma.martinez@example.net  ┃+3322114455 ┃910 Cherry St, Everywhere-ville, USA ┃
 ┗━━━━━━━━━━━━━━━┻━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`
 	output, err := display.StaticBoxGrid(slice2d)
-	if err != nil {
-		return false
-	}
 	if output != noHeader {
 		return false
 	}
 	output, err = display.StaticBoxGrid(slice2d, true)
-	if err != nil {
-		return false
-	}
 	header := `┏━━━━━━━━━━━━━━━┳━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃Name           ┃Age┃Email                      ┃Phone Number┃Address                              ┃
 ┣━━━━━━━━━━━━━━━╋━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
@@ -296,6 +290,25 @@ func testStaticBoxGrid() bool {
 ┃Emma Martinez  ┃26 ┃emma.martinez@example.net  ┃+3322114455 ┃910 Cherry St, Everywhere-ville, USA ┃
 ┗━━━━━━━━━━━━━━━┻━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`
 	if output != header {
+		return false
+	}
+	_, err = display.StaticBoxGrid([][]string{})
+	if err == nil {
+		fmt.Println("no data")
+		return false
+	}
+	_, err = display.StaticBoxGrid([][]string{
+		{},
+	})
+	if err == nil {
+		fmt.Println("no columns")
+		return false
+	}
+	_, err = display.StaticBoxGrid([][]string{
+		{"Test"},
+	}, true)
+	if err == nil {
+		fmt.Println("header; less then 2")
 		return false
 	}
 	return true
@@ -325,12 +338,24 @@ func testStaticTabGrid() bool {
  Daniel Kim      45  daniel.kim@example.net      +3322114455  890 Birch St, Here, USA               
  Olivia Wilson   29  olivia.wilson@example.org   +1122334455  345 Oak-wood Ln, There, USA           
  James Taylor    38  james.taylor@example.com    +7788994455  678 Pinterest Dr, Anywhere-ville, USA 
- Emma Martinez   26  emma.martinez@example.net   +3322114455  910 Cherry St, Everywhere-ville, USA `
+ Emma Martinez   26  emma.martinez@example.net   +3322114455  910 Cherry St, Everywhere-ville, USA  
+`
 	output, err := display.StaticTabGrid(slice2d)
-	if err != nil {
+	if output != expected {
+		fmt.Println("bad output")
 		return false
 	}
-	if output != expected {
+
+	_, err = display.StaticTabGrid([][]string{})
+	if err == nil {
+		fmt.Println("no data")
+		return false
+	}
+	_, err = display.StaticTabGrid([][]string{
+		{},
+	})
+	if err == nil {
+		fmt.Println("no columns")
 		return false
 	}
 

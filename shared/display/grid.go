@@ -125,7 +125,9 @@ func StaticBoxGrid(gridData [][]string, options ...bool) (string, error) {
 	if len(gridData) == 0 {
 		return "", errors.New("table contains no rows")
 	}
-
+	if len(gridData) == 1 && header {
+		return "", errors.New("cannot have less then 2 rows when header is enabled")
+	}
 	biggestFields := make([]string, fields)
 	for x := 0; x < len(gridData); x++ {
 		for i := 0; i < len(biggestFields); i++ {
