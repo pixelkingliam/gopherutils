@@ -64,7 +64,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `df`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
