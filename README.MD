@@ -113,13 +113,6 @@ See `LICENSE`
   ❌ Advanced functionality
 
   ❌ GNU Compatibility
-* `mknod`
-
-  ❌ Basic functionality
-
-  ❌ Advanced functionality
-
-  ❌ GNU Compatibility
 * `mktemp`
 
   ❌ Basic functionality
