@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/shirou/gopsutil/disk"
@@ -12,16 +13,31 @@ import (
 func main() {
 	var options struct {
 		TabTable bool `short:"T" long:"tab" description:"Displays the table using tabs; GNU Compatible"`
+		Posix    bool `short:"P" long:"portability" description:"Uses POSIX-compatible header; implies -P"`
 	}
-	args, err := flags.ParseArgs(&options, os.Args)
-	args = args[1:]
+	_, err := flags.ParseArgs(&options, os.Args[1:])
+	if err != nil {
+		if errors.Is(err, flags.ErrHelp) {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
+	}
+	if options.Posix {
+		options.TabTable = true
+	}
 	partitions, err := disk.Partitions(false)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 	table := make([][]string, 0)
-	table = append(table, []string{"Device", "Type", "1K-blocks", "Used", "Available", "Use%", "Mounted On"})
+	if options.Posix {
+		table = append(table, []string{"Device", "Type", "1024-blocks", "Used", "Available", "Capacity", "Mounted On"})
+		options.TabTable = true
+	} else {
+		table = append(table, []string{"Device", "Type", "1K-blocks", "Used", "Available", "Use%", "Mounted On"})
+	}
 	for _, partition := range partitions {
 		usage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
