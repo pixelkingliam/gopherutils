@@ -15,4 +15,5 @@ require (
 	github.com/adnsv/go-markout v0.5.2
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	golang.org/x/exp v0.0.0-20221019170559-20944726eadf
 )

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"gopherutils/shared/ansi"
+	"gopherutils/shared/convert"
 	"gopherutils/shared/display"
 	"gopherutils/shared/gquery"
 	"slices"
@@ -113,9 +114,81 @@ func main() {
 
 	failures = gquery.All(displayResults, false)
 	if failures == 0 {
-		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> display")
+		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> convert")
 	} else {
-		fmt.Println(ansi.RedFG+"[", failures, "TESTS FAILED]"+ansi.ResetColor, "=> display")
+		fmt.Println(ansi.RedFG+"[", failures, "TESTS FAILED]"+ansi.ResetColor, "=> convert")
+	}
+
+	fmt.Println("[ TESTING ] => convert")
+	var convertResults []bool
+
+	// Testing ToKilo
+	result = testToKilo()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToKilo[T constraints.Integer](value T, options ...bool) float32")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToKilo[T constraints.Integer](value T, options ...bool) float32")
+	}
+	convertResults = append(convertResults, result)
+
+	// Testing ToMega
+	result = testToMega()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToMega[T constraints.Integer](value T, options ...bool) float32")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToMega[T constraints.Integer](value T, options ...bool) float32")
+	}
+	convertResults = append(convertResults, result)
+	// Testing ToGiga
+	result = testToGiga()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToGiga[T constraints.Integer](value T, options ...bool) float32")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToGiga[T constraints.Integer](value T, options ...bool) float32")
+	}
+	convertResults = append(convertResults, result)
+
+	// Testing ToTera
+	result = testToTera()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToTera[T constraints.Integer](value T, options ...bool) float32")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToTera[T constraints.Integer](value T, options ...bool) float32")
+	}
+	convertResults = append(convertResults, result)
+
+	// Testing ToPeta
+	result = testToPeta()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToPeta[T constraints.Integer](value T, options ...bool) float32")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToPeta[T constraints.Integer](value T, options ...bool) float32")
+	}
+	convertResults = append(convertResults, result)
+
+	// Testing ToBinary
+	result = testToBinary()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToBinary(value int64) string")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToBinary(value int64) string")
+	}
+	convertResults = append(convertResults, result)
+
+	// Testing ToSI
+	result = testToSI()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.ToSI(value int64) string")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToSI(value int64) string")
+	}
+	convertResults = append(convertResults, result)
+
+	failures = gquery.All(convertResults, false)
+	if failures == 0 {
+		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> convert")
+	} else {
+		fmt.Println(ansi.RedFG+"[", failures, "TESTS FAILED]"+ansi.ResetColor, "=> convert")
 	}
 
 }
@@ -359,5 +432,171 @@ func testStaticTabGrid() bool {
 		return false
 	}
 
+	return true
+}
+func testToKilo() bool {
+	if convert.ToKilo(1024) != 1 {
+		fmt.Printf("1024 = %f\n", convert.ToKilo(1024))
+
+		return false
+	}
+	if convert.ToKilo(512) != 0.5 {
+		fmt.Printf("512 = %f\n", convert.ToKilo(512))
+
+		return false
+	}
+	if convert.ToKilo(1000) == 1 {
+		fmt.Printf("1000 = %f\n", convert.ToKilo(1000))
+
+		return false
+	}
+	if convert.ToKilo(500) == 0.5 {
+		fmt.Printf("500 = %f\n", convert.ToKilo(500))
+		return false
+	}
+	if convert.ToKilo(1000, true) != 1 {
+		fmt.Printf("1000 = %f\n", convert.ToKilo(1000, true))
+
+		return false
+	}
+	if convert.ToKilo(500, true) != 0.5 {
+		fmt.Printf("500 = %f\n", convert.ToKilo(500, true))
+		return false
+	}
+	return true
+}
+func testToMega() bool {
+	if convert.ToMega(1024*1024) != 1 {
+		fmt.Printf("1024*1024 = %f\n", convert.ToMega(1024*1024))
+		return false
+	}
+	if convert.ToMega(512*1024) != 0.5 {
+		fmt.Printf("512*1024 = %f\n", convert.ToMega(512*1024))
+		return false
+	}
+	if convert.ToMega(1000000) == 1 {
+		fmt.Printf("1000000 = %f\n", convert.ToMega(1000000))
+		return false
+	}
+	if convert.ToMega(500000) == 0.5 {
+		fmt.Printf("500000 = %f\n", convert.ToMega(500000))
+		return false
+	}
+	if convert.ToMega(1000000, true) != 1 {
+		fmt.Printf("1000000 = %f\n", convert.ToMega(1000000, true))
+		return false
+	}
+	if convert.ToMega(500000, true) != 0.5 {
+		fmt.Printf("500000 = %f\n", convert.ToMega(500000, true))
+		return false
+	}
+	return true
+}
+
+func testToGiga() bool {
+	if convert.ToGiga(1024*1024*1024) != 1 {
+		fmt.Printf("1024*1024*1024 = %f\n", convert.ToGiga(1024*1024*1024))
+		return false
+	}
+	if convert.ToGiga(512*1024*1024) != 0.5 {
+		fmt.Printf("512*1024*1024 = %f\n", convert.ToGiga(512*1024*1024))
+		return false
+	}
+	if convert.ToGiga(1000000000) == 1 {
+		fmt.Printf("1000000000 = %f\n", convert.ToGiga(1000000000))
+		return false
+	}
+	if convert.ToGiga(500000000) == 0.5 {
+		fmt.Printf("500000000 = %f\n", convert.ToGiga(500000000))
+		return false
+	}
+	if convert.ToGiga(1000000000, true) != 1 {
+		fmt.Printf("1000000000 = %f\n", convert.ToGiga(1000000000, true))
+		return false
+	}
+	if convert.ToGiga(500000000, true) != 0.5 {
+		fmt.Printf("500000000 = %f\n", convert.ToGiga(500000000, true))
+		return false
+	}
+	return true
+}
+
+func testToTera() bool {
+	if convert.ToTera(1024*1024*1024*1024) != 1 {
+		fmt.Printf("1024*1024*1024*1024 = %f\n", convert.ToTera(1024*1024*1024*1024))
+		return false
+	}
+	if convert.ToTera(512*1024*1024*1024) != 0.5 {
+		fmt.Printf("512*1024*1024*1024 = %f\n", convert.ToTera(512*1024*1024*1024))
+		return false
+	}
+	if convert.ToTera(1000000000000) == 1 {
+		fmt.Printf("1000000000000 = %f\n", convert.ToTera(1000000000000))
+		return false
+	}
+	if convert.ToTera(500000000000) == 0.5 {
+		fmt.Printf("500000000000 = %f\n", convert.ToTera(500000000000))
+		return false
+	}
+	if convert.ToTera(1000000000000, true) != 1 {
+		fmt.Printf("1000000000000 = %f\n", convert.ToTera(1000000000000, true))
+		return false
+	}
+	if convert.ToTera(500000000000, true) != 0.5 {
+		fmt.Printf("500000000000 = %f\n", convert.ToTera(500000000000, true))
+		return false
+	}
+	return true
+}
+
+func testToPeta() bool {
+	if convert.ToPeta(1024*1024*1024*1024*1024) != 1 {
+		fmt.Printf("1024*1024*1024*1024*1024 = %f\n", convert.ToPeta(1024*1024*1024*1024*1024))
+		return false
+	}
+	if convert.ToPeta(512*1024*1024*1024*1024) != 0.5 {
+		fmt.Printf("512*1024*1024*1024*1024 = %f\n", convert.ToPeta(512*1024*1024*1024*1024))
+		return false
+	}
+	if convert.ToPeta(1000000000000000) == 1 {
+		fmt.Printf("1000000000000000 = %f\n", convert.ToPeta(1000000000000000))
+		return false
+	}
+	if convert.ToPeta(500000000000000) == 0.5 {
+		fmt.Printf("500000000000000 = %f\n", convert.ToPeta(500000000000000))
+		return false
+	}
+	if convert.ToPeta(1000000000000000, true) != 1 {
+		fmt.Printf("1000000000000000 = %f\n", convert.ToPeta(1000000000000000, true))
+		return false
+	}
+	if convert.ToPeta(500000000000000, true) != 0.5 {
+		fmt.Printf("500000000000000 = %f\n", convert.ToPeta(500000000000000, true))
+		return false
+	}
+	return true
+}
+func testToBinary() bool {
+	if convert.ToBinary(1024) != "1 KiB" {
+		return false
+	}
+	if convert.ToBinary(1000) != "1000 B" {
+		return false
+	}
+	if convert.ToBinary((1024)*(1024)) != "1 MiB" {
+		return false
+	}
+	return true
+}
+func testToSI() bool {
+	if convert.ToSI(1000) != "1 KB" {
+		return false
+	}
+	if convert.ToSI(1024) != "1.024 KB" {
+		return false
+	}
+	if convert.ToSI(1000000) != "1 MB" {
+		return false
+	}
 	return true
 }

@@ -1,70 +1,70 @@
-package main
+package convert
 
 import (
 	"fmt"
 	"golang.org/x/exp/constraints"
 )
 
-func ToKilo[T constraints.Integer](value T, options ...bool) T {
+func ToKilo[T constraints.Integer](value T, options ...bool) float32 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return value / 1000
+		return float32(value) / 1000
 	} else {
-		return value / 1024
+		return float32(value) / 1024
 	}
 }
 
-func ToMega[T constraints.Integer](value T, options ...bool) T {
+func ToMega[T constraints.Integer](value T, options ...bool) float32 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return value / 1000000
+		return float32(value) / 1000000
 	} else {
-		return value / (1024 * 1024)
+		return float32(value) / (1024 * 1024)
 	}
 }
 
-func ToGiga[T constraints.Integer](value T, options ...bool) T {
+func ToGiga[T constraints.Integer](value T, options ...bool) float32 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return value / 1000000000
+		return float32(value) / 1000000000
 	} else {
-		return value / (1024 * 1024 * 1024)
+		return float32(value) / (1024 * 1024 * 1024)
 	}
 }
 
-func ToTera[T constraints.Integer](value T, options ...bool) T {
+func ToTera[T constraints.Integer](value T, options ...bool) float32 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return value / 1000000000000
+		return float32(value) / 1000000000000
 	} else {
-		return value / (1024 * 1024 * 1024 * 1024)
+		return float32(value) / (1024 * 1024 * 1024 * 1024)
 	}
 }
 
-func ToPeta[T constraints.Integer](value T, options ...bool) T {
+func ToPeta[T constraints.Integer](value T, options ...bool) float32 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return value / 1000000000000000
+		return float32(value) / 1000000000000000
 	} else {
-		return value / (1024 * 1024 * 1024 * 1024 * 1024)
+		return float32(value) / (1024 * 1024 * 1024 * 1024 * 1024)
 	}
 }
-func ToBinary[T constraints.Integer](value T) string {
+func ToBinary(value int64) string {
 	switch {
 	case value >= (1024 * 1024 * 1024 * 1024 * 1024):
 		return fmt.Sprintf("%v PiB", ToPeta(value))
@@ -81,7 +81,7 @@ func ToBinary[T constraints.Integer](value T) string {
 	}
 }
 
-func ToSI[T constraints.Integer](value T) string {
+func ToSI(value int64) string {
 	switch {
 	case value >= 1000000000000000:
 		return fmt.Sprintf("%v PB", ToPeta(value, true))
