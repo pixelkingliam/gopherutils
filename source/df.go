@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/shirou/gopsutil/disk"
+	"gopherutils/shared/convert"
 	"gopherutils/shared/display"
 	"math"
 	"os"
@@ -12,8 +13,10 @@ import (
 
 func main() {
 	var options struct {
-		TabTable bool `short:"T" long:"tab" description:"Displays the table using tabs; GNU Compatible"`
-		Posix    bool `short:"P" long:"portability" description:"Uses POSIX-compatible header; implies -P"`
+		BinaryPrefix bool `short:"b" long:"human-readable" description:"Displays sizes in powers of 1024 (e.g., 1023MiB)"`
+		SIPrefix     bool `short:"H" long:"si-prefix" description:"print sizes in powers of 1000 (e.g., 1.1GB)"`
+		TabTable     bool `short:"T" long:"tab" description:"Displays the table using tabs; GNU Compatible"`
+		Posix        bool `short:"P" long:"portability" description:"Uses POSIX-compatible header; implies -P"`
 	}
 	_, err := flags.ParseArgs(&options, os.Args[1:])
 	if err != nil {
@@ -38,13 +41,39 @@ func main() {
 	} else {
 		table = append(table, []string{"Device", "Type", "1K-blocks", "Used", "Available", "Use%", "Mounted On"})
 	}
+	if options.BinaryPrefix || options.SIPrefix {
+		table[0][2] = "Size"
+	}
 	for _, partition := range partitions {
 		usage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		table = append(table, []string{partition.Device, partition.Fstype, fmt.Sprintf("%v", usage.Total/1024), fmt.Sprintf("%v", usage.Used/1024), fmt.Sprintf("%v", usage.Total/1024-usage.Used/1024), fmt.Sprintf("%v%%", int(math.Round(usage.UsedPercent))), partition.Mountpoint})
+		size := fmt.Sprintf("%v", usage.Total/1024)
+		if options.SIPrefix {
+			size = convert.ToSI(usage.Total)
+		} else if options.BinaryPrefix {
+			size = convert.ToBinary(usage.Total)
+
+		}
+
+		used := fmt.Sprintf("%v", usage.Used/1024)
+		if options.SIPrefix {
+			used = convert.ToSI(usage.Used)
+		} else if options.BinaryPrefix {
+			used = convert.ToBinary(usage.Used)
+
+		}
+
+		free := fmt.Sprintf("%v", usage.Total/1024-usage.Used/1024)
+		if options.SIPrefix {
+			free = convert.ToSI(usage.Total - usage.Used)
+		} else if options.BinaryPrefix {
+			free = convert.ToBinary(usage.Total - usage.Used)
+
+		}
+		table = append(table, []string{partition.Device, partition.Fstype, size, used, free, fmt.Sprintf("%v%%", int(math.Round(usage.UsedPercent))), partition.Mountpoint})
 	}
 	var output string
 	if options.TabTable {
