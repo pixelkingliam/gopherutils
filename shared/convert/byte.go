@@ -68,17 +68,17 @@ func ToBinary[T constraints.Integer](value T) string {
 	finalValue := uint64(value)
 	switch {
 	case finalValue >= (1024 * 1024 * 1024 * 1024 * 1024):
-		return fmt.Sprintf("%v PiB", ToPeta(finalValue))
+		return fmt.Sprintf("%vPiB", ToPeta(finalValue))
 	case finalValue >= (1024 * 1024 * 1024 * 1024):
-		return fmt.Sprintf("%v TiB", ToTera(finalValue))
+		return fmt.Sprintf("%vTiB", ToTera(finalValue))
 	case finalValue >= (1024 * 1024 * 1024):
-		return fmt.Sprintf("%v GiB", ToGiga(finalValue))
+		return fmt.Sprintf("%vGiB", ToGiga(finalValue))
 	case finalValue >= (1024 * 1024):
-		return fmt.Sprintf("%v MiB", ToMega(finalValue))
+		return fmt.Sprintf("%vMiB", ToMega(finalValue))
 	case finalValue >= 1024:
-		return fmt.Sprintf("%v KiB", ToKilo(finalValue))
+		return fmt.Sprintf("%vKiB", ToKilo(finalValue))
 	default:
-		return fmt.Sprintf("%v B", finalValue)
+		return fmt.Sprintf("%vB", finalValue)
 	}
 }
 
@@ -86,16 +86,16 @@ func ToSI[T constraints.Integer](value T) string {
 	finalValue := uint64(value)
 	switch {
 	case finalValue >= 1000000000000000:
-		return fmt.Sprintf("%v PB", ToPeta(finalValue, true))
+		return fmt.Sprintf("%vPB", ToPeta(finalValue, true))
 	case finalValue >= 1000000000000:
-		return fmt.Sprintf("%v TB", ToTera(finalValue, true))
+		return fmt.Sprintf("%vTB", ToTera(finalValue, true))
 	case finalValue >= 1000000000:
-		return fmt.Sprintf("%v GB", ToGiga(finalValue, true))
+		return fmt.Sprintf("%vGB", ToGiga(finalValue, true))
 	case finalValue >= 1000000:
-		return fmt.Sprintf("%v MB", ToMega(finalValue, true))
+		return fmt.Sprintf("%vMB", ToMega(finalValue, true))
 	case finalValue >= 1000:
-		return fmt.Sprintf("%v KB", ToKilo(finalValue, true))
+		return fmt.Sprintf("%vKB", ToKilo(finalValue, true))
 	default:
-		return fmt.Sprintf("%v B", value)
+		return fmt.Sprintf("%vB", value)
 	}
 }

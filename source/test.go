@@ -577,25 +577,25 @@ func testToPeta() bool {
 	return true
 }
 func testToBinary() bool {
-	if convert.ToBinary(1024) != "1 KiB" {
+	if convert.ToBinary(1024) != "1KiB" {
 		return false
 	}
-	if convert.ToBinary(1000) != "1000 B" {
+	if convert.ToBinary(1000) != "1000B" {
 		return false
 	}
-	if convert.ToBinary((1024)*(1024)) != "1 MiB" {
+	if convert.ToBinary((1024)*(1024)) != "1MiB" {
 		return false
 	}
 	return true
 }
 func testToSI() bool {
-	if convert.ToSI(1000) != "1 KB" {
+	if convert.ToSI(1000) != "1KB" {
 		return false
 	}
-	if convert.ToSI(1024) != "1.024 KB" {
+	if convert.ToSI(1024) != "1.024KB" {
 		return false
 	}
-	if convert.ToSI(1000000) != "1 MB" {
+	if convert.ToSI(1000000) != "1MB" {
 		return false
 	}
 	return true
