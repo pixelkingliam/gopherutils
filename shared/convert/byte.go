@@ -3,99 +3,141 @@ package convert
 import (
 	"fmt"
 	"golang.org/x/exp/constraints"
+	"math"
 )
 
-func ToKilo[T constraints.Integer](value T, options ...bool) float32 {
+func ToKilo[T constraints.Integer](value T, options ...bool) float64 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return float32(value) / 1000
+		return float64(value) / 1000
 	} else {
-		return float32(value) / 1024
+		return float64(value) / 1024
 	}
 }
 
-func ToMega[T constraints.Integer](value T, options ...bool) float32 {
+func ToMega[T constraints.Integer](value T, options ...bool) float64 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return float32(value) / 1000000
+		return float64(value) / 1000000
 	} else {
-		return float32(value) / (1024 * 1024)
+		return float64(value) / (1024 * 1024)
 	}
 }
 
-func ToGiga[T constraints.Integer](value T, options ...bool) float32 {
+func ToGiga[T constraints.Integer](value T, options ...bool) float64 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return float32(value) / 1000000000
+		return float64(value) / 1000000000
 	} else {
-		return float32(value) / (1024 * 1024 * 1024)
+		return float64(value) / (1024 * 1024 * 1024)
 	}
 }
 
-func ToTera[T constraints.Integer](value T, options ...bool) float32 {
+func ToTera[T constraints.Integer](value T, options ...bool) float64 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return float32(value) / 1000000000000
+		return float64(value) / 1000000000000
 	} else {
-		return float32(value) / (1024 * 1024 * 1024 * 1024)
+		return float64(value) / (1024 * 1024 * 1024 * 1024)
 	}
 }
 
-func ToPeta[T constraints.Integer](value T, options ...bool) float32 {
+func ToPeta[T constraints.Integer](value T, options ...bool) float64 {
 	si := false // Default value
 	if len(options) > 0 {
 		si = options[0]
 	}
 	if si {
-		return float32(value) / 1000000000000000
+		return float64(value) / 1000000000000000
 	} else {
-		return float32(value) / (1024 * 1024 * 1024 * 1024 * 1024)
+		return float64(value) / (1024 * 1024 * 1024 * 1024 * 1024)
 	}
 }
-func ToBinary[T constraints.Integer](value T) string {
+func ToBinary[T constraints.Integer](value T, round bool) string {
 	finalValue := uint64(value)
 	switch {
 	case finalValue >= (1024 * 1024 * 1024 * 1024 * 1024):
-		return fmt.Sprintf("%vPiB", ToPeta(finalValue))
+		result := ToPeta(finalValue)
+		if round {
+			return fmt.Sprintf("%v PiB", math.Round(result))
+		}
+		return fmt.Sprintf("%v PiB", result)
 	case finalValue >= (1024 * 1024 * 1024 * 1024):
-		return fmt.Sprintf("%vTiB", ToTera(finalValue))
+		result := ToTera(finalValue)
+		if round {
+			return fmt.Sprintf("%v TiB", math.Round(result))
+		}
+		return fmt.Sprintf("%v TiB", result)
 	case finalValue >= (1024 * 1024 * 1024):
-		return fmt.Sprintf("%vGiB", ToGiga(finalValue))
+		result := ToGiga(finalValue)
+		if round {
+			return fmt.Sprintf("%v GiB", math.Round(result))
+		}
+		return fmt.Sprintf("%v GiB", result)
 	case finalValue >= (1024 * 1024):
-		return fmt.Sprintf("%vMiB", ToMega(finalValue))
+		result := ToMega(finalValue)
+		if round {
+			return fmt.Sprintf("%v MiB", math.Round(result))
+		}
+		return fmt.Sprintf("%v MiB", result)
 	case finalValue >= 1024:
-		return fmt.Sprintf("%vKiB", ToKilo(finalValue))
+		result := ToKilo(finalValue)
+		if round {
+			return fmt.Sprintf("%v KiB", math.Round(result))
+		}
+		return fmt.Sprintf("%v KiB", result)
 	default:
-		return fmt.Sprintf("%vB", finalValue)
+		return fmt.Sprintf("%v B", finalValue)
 	}
 }
 
-func ToSI[T constraints.Integer](value T) string {
+func ToSI[T constraints.Integer](value T, round bool) string {
 	finalValue := uint64(value)
+
 	switch {
 	case finalValue >= 1000000000000000:
-		return fmt.Sprintf("%vPB", ToPeta(finalValue, true))
+		result := ToPeta(finalValue, true)
+		if round {
+			return fmt.Sprintf("%v PB", math.Round(result))
+		}
+		return fmt.Sprintf("%v PB", result)
 	case finalValue >= 1000000000000:
-		return fmt.Sprintf("%vTB", ToTera(finalValue, true))
+		result := ToTera(finalValue, true)
+		if round {
+			return fmt.Sprintf("%v TB", math.Round(result))
+		}
+		return fmt.Sprintf("%v TB", result)
 	case finalValue >= 1000000000:
-		return fmt.Sprintf("%vGB", ToGiga(finalValue, true))
+		result := ToGiga(finalValue, true)
+		if round {
+			return fmt.Sprintf("%v GB", math.Round(result))
+		}
+		return fmt.Sprintf("%v GB", result)
 	case finalValue >= 1000000:
-		return fmt.Sprintf("%vMB", ToMega(finalValue, true))
+		result := ToMega(finalValue, true)
+		if round {
+			return fmt.Sprintf("%v MB", math.Round(result))
+		}
+		return fmt.Sprintf("%v MB", result)
 	case finalValue >= 1000:
-		return fmt.Sprintf("%vKB", ToKilo(finalValue, true))
+		result := ToKilo(finalValue, true)
+		if round {
+			return fmt.Sprintf("%v KB", math.Round(result))
+		}
+		return fmt.Sprintf("%v KB", result)
 	default:
-		return fmt.Sprintf("%vB", value)
+		return fmt.Sprintf("%v B", value)
 	}
 }

@@ -52,25 +52,25 @@ func main() {
 		}
 		size := fmt.Sprintf("%v", usage.Total/1024)
 		if options.SIPrefix {
-			size = convert.ToSI(usage.Total)
+			size = convert.ToSI(usage.Total, true)
 		} else if options.BinaryPrefix {
-			size = convert.ToBinary(usage.Total)
+			size = convert.ToBinary(usage.Total, true)
 
 		}
 
 		used := fmt.Sprintf("%v", usage.Used/1024)
 		if options.SIPrefix {
-			used = convert.ToSI(usage.Used)
+			used = convert.ToSI(usage.Used, true)
 		} else if options.BinaryPrefix {
-			used = convert.ToBinary(usage.Used)
+			used = convert.ToBinary(usage.Used, true)
 
 		}
 
 		free := fmt.Sprintf("%v", usage.Total/1024-usage.Used/1024)
 		if options.SIPrefix {
-			free = convert.ToSI(usage.Total - usage.Used)
+			free = convert.ToSI(usage.Total-usage.Used, true)
 		} else if options.BinaryPrefix {
-			free = convert.ToBinary(usage.Total - usage.Used)
+			free = convert.ToBinary(usage.Total-usage.Used, true)
 
 		}
 		table = append(table, []string{partition.Device, partition.Fstype, size, used, free, fmt.Sprintf("%v%%", int(math.Round(usage.UsedPercent))), partition.Mountpoint})
