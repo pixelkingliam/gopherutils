@@ -219,7 +219,6 @@ func StaticTabGrid(gridData [][]string) (string, error) {
 	// Draw entries
 
 	for x := 0; x < len(gridData); x++ {
-		finalString += " "
 		for y := 0; y < fields; y++ {
 			finalString += gridData[x][y] + strings.Repeat(" ", wcwidth.StringCells(biggestFields[y])-wcwidth.StringCells(gridData[x][y])) + " " // Fill empty cells with spaces continue
 		}

@@ -401,17 +401,17 @@ func testStaticTabGrid() bool {
 		{"Emma Martinez", "26", "emma.martinez@example.net", "+3322114455", "910 Cherry St, Everywhere-ville, USA"},
 	}
 	expected :=
-		` Name            Age Email                       Phone Number Address                               
- John Doe        35  john.doe@example.com        +1234567890  123 Main St, Any-town, USA            
- Jane Smith      28  jane.smith@gmail.com        +1987654321  456 Elm St, Another Town, USA         
- Michael Johnson 42  michael.johnson@example.org +1122334455  789 Oak St, Somewhere, USA            
- Emily Davis     22  emily.davis@example.net     +9988776655  101 Pine St, Nowhere, USA             
- David Brown     50  david.brown@example.com     +1122334455  1234 Maple Ave, Anywhere, USA         
- Sarah Lee       31  sarah.lee@example.com       +5544332211  567 Cedar St, Everywhere, USA         
- Daniel Kim      45  daniel.kim@example.net      +3322114455  890 Birch St, Here, USA               
- Olivia Wilson   29  olivia.wilson@example.org   +1122334455  345 Oak-wood Ln, There, USA           
- James Taylor    38  james.taylor@example.com    +7788994455  678 Pinterest Dr, Anywhere-ville, USA 
- Emma Martinez   26  emma.martinez@example.net   +3322114455  910 Cherry St, Everywhere-ville, USA  
+		`Name            Age Email                       Phone Number Address                               
+John Doe        35  john.doe@example.com        +1234567890  123 Main St, Any-town, USA            
+Jane Smith      28  jane.smith@gmail.com        +1987654321  456 Elm St, Another Town, USA         
+Michael Johnson 42  michael.johnson@example.org +1122334455  789 Oak St, Somewhere, USA            
+Emily Davis     22  emily.davis@example.net     +9988776655  101 Pine St, Nowhere, USA             
+David Brown     50  david.brown@example.com     +1122334455  1234 Maple Ave, Anywhere, USA         
+Sarah Lee       31  sarah.lee@example.com       +5544332211  567 Cedar St, Everywhere, USA         
+Daniel Kim      45  daniel.kim@example.net      +3322114455  890 Birch St, Here, USA               
+Olivia Wilson   29  olivia.wilson@example.org   +1122334455  345 Oak-wood Ln, There, USA           
+James Taylor    38  james.taylor@example.com    +7788994455  678 Pinterest Dr, Anywhere-ville, USA 
+Emma Martinez   26  emma.martinez@example.net   +3322114455  910 Cherry St, Everywhere-ville, USA  
 `
 	output, err := display.StaticTabGrid(slice2d)
 	if output != expected {
