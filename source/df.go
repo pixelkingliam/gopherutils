@@ -17,6 +17,7 @@ func main() {
 		SIPrefix     bool `short:"H" long:"si-prefix" description:"print sizes in powers of 1000 (e.g., 1.1GB)"`
 		TabTable     bool `short:"T" long:"tab" description:"Displays the table using tabs; GNU Compatible"`
 		Posix        bool `short:"P" long:"portability" description:"Uses POSIX-compatible header; implies -P"`
+		All          bool `short:"a" long:"all" description:"Include all file systems"`
 	}
 	_, err := flags.ParseArgs(&options, os.Args[1:])
 	if err != nil {
@@ -29,7 +30,7 @@ func main() {
 	if options.Posix {
 		options.TabTable = true
 	}
-	partitions, err := disk.Partitions(false)
+	partitions, err := disk.Partitions(options.All)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
