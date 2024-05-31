@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func main() {
@@ -20,10 +21,11 @@ func main() {
 		TabTable     bool   `short:"T" long:"tab" description:"Displays the table using tabs; GNU Compatible"` // By default, renders with UTF-8 grid
 		Posix        bool   `short:"P" long:"portability" description:"Uses POSIX-compatible header; implies -P"`
 		All          bool   `short:"a" long:"all" description:"Include all file systems"`
-		BlockSize    string `short:"B" long:"block-size" description:"scale sizes by SIZE before printing them; e.g.,\n-BM' prints sizes in units of 1,048,576 bytes;\n{To fill out available sizes}"`
+		BlockSize    string `short:"B" long:"block-size" description:"Scale sizes by SIZE before printing them. The SIZE parameter specifies the units in which sizes should be displayed.\nFor example, '-BM' prints sizes in units of 1,048,576 bytes (1MiB), '-BK' prints sizes in units of 1,024 bytes (1KiB), and so on.\nSupported suffixes for SIZE include: 'B' (bytes),\n'K' (Kilobytes, 1024 bytes),\n'M' (Megabytes, 1024^2 bytes),\n'G' (Gigabytes, 1024^3 bytes),\n'T' (Terabytes, 1024^4 bytes),\n'P' (Petabytes, 1024^5 bytes),\nand 'E' (Exabytes, 1024^6 bytes)\n"`
 	}
 	options.BlockSize = "1K"
 	_, err := flags.ParseArgs(&options, os.Args[1:])
+	options.BlockSize = sanitizeBArg(options.BlockSize)
 	if err != nil {
 		if errors.Is(err, flags.ErrHelp) {
 			os.Exit(0)
@@ -121,4 +123,30 @@ func resolveBlocks(bytes int64, blocks string) int64 {
 }
 func isDigit(c uint8) bool {
 	return c >= '0' && c <= '9'
+}
+func sanitizeBArg(str string) string {
+	var builder strings.Builder
+	for i := 0; i < len(str); i++ {
+		if !isDigit(str[i]) {
+			builder.WriteString(strings.ToLower(string(str[i])))
+			break
+		}
+		builder.WriteByte(str[i])
+	}
+	final := builder.String()
+	if len(final) > 0 {
+		lastChar := final[len(final)-1]
+		if unicode.IsLetter(rune(lastChar)) {
+			switch lastChar {
+			case 'k', 'm', 'g', 't', 'p', 'e':
+				return final
+			default:
+				return final[:len(final)-1]
+			}
+		} else {
+			return final[:len(final)-1]
+		}
+	}
+
+	return final
 }
