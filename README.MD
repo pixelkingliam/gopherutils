@@ -103,7 +103,7 @@ See `LICENSE`
 
   ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
   ❌ GNU Compatibility
 * `mkfifo`
@@ -544,11 +544,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `printenv`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `printf`
 
   ❌ Basic functionality
