@@ -66,9 +66,9 @@ See `LICENSE`
 
   ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ➗ GNU Compatibility
 * `dir`
 
   ❌ Basic functionality
