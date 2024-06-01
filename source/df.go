@@ -17,11 +17,12 @@ import (
 func main() {
 	var options struct {
 		BinaryPrefix bool   `short:"b" long:"human-readable" description:"Displays sizes in powers of 1024 (e.g., 1023MiB)"`
-		SIPrefix     bool   `short:"H" long:"si-prefix" description:"print sizes in powers of 1000 (e.g., 1.1GB)"`
+		SIPrefix     bool   `short:"H" long:"si" description:"print sizes in powers of 1000 (e.g., 1.1GB)"`
 		TabTable     bool   `short:"T" long:"tab" description:"Displays the table using tabs; GNU Compatible"` // By default, renders with UTF-8 grid
 		Posix        bool   `short:"P" long:"portability" description:"Uses POSIX-compatible header; implies -P"`
 		All          bool   `short:"a" long:"all" description:"Include all file systems"`
 		BlockSize    string `short:"B" long:"block-size" description:"Scale sizes by SIZE before printing them. The SIZE parameter specifies the units in which sizes should be displayed.\nFor example, '-BM' prints sizes in units of 1,048,576 bytes (1MiB), '-BK' prints sizes in units of 1,024 bytes (1KiB), and so on.\nSupported suffixes for SIZE include: 'B' (bytes),\n'K' (Kilobytes, 1024 bytes),\n'M' (Megabytes, 1024^2 bytes),\n'G' (Gigabytes, 1024^3 bytes),\n'T' (Terabytes, 1024^4 bytes),\n'P' (Petabytes, 1024^5 bytes),\nand 'E' (Exabytes, 1024^6 bytes)\n"`
+		INodes       bool   `short:"i" long:"inodes" description:"List inode information instead of block usage"`
 	}
 	options.BlockSize = "1K"
 	_, err := flags.ParseArgs(&options, os.Args[1:])
@@ -45,7 +46,13 @@ func main() {
 		os.Exit(1)
 	}
 	table := make([][]string, 0)
-	table = append(table, []string{"Device", "Type", fmt.Sprintf("%s-blocks", options.BlockSize), "Used", "Available", "Use%", "Mounted On"})
+	if options.INodes {
+		table = append(table, []string{"Device", "Type", "Inodes", "IUsed", "IFree", "IUse%", "Mounted On"})
+
+	} else {
+		table = append(table, []string{"Device", "Type", fmt.Sprintf("%s-blocks", options.BlockSize), "Used", "Available", "Use%", "Mounted On"})
+
+	}
 
 	if options.BinaryPrefix || options.SIPrefix {
 		table[0][2] = "Size"
@@ -55,6 +62,11 @@ func main() {
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
+		}
+		if options.INodes {
+			table = append(table, []string{partition.Device, partition.Fstype, fmt.Sprintf("%v", usage.InodesTotal), fmt.Sprintf("%v", usage.InodesUsed), fmt.Sprintf("%v", usage.InodesFree), fmt.Sprintf("%v%%", int(math.Round(usage.InodesUsedPercent))), partition.Mountpoint})
+
+			continue
 		}
 		size := fmt.Sprintf("%v", resolveBlocks(int64(usage.Total), options.BlockSize))
 		if options.SIPrefix {
