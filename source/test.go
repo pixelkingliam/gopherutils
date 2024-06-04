@@ -69,6 +69,14 @@ func main() {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.StartsWith(str string, compare string) bool")
 	}
 	gqueryResults = append(gqueryResults, result)
+	// Testing IsDigit
+	result = testIsDigit()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.IsDigit(c uint8) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.IsDigit(c uint8) bool")
+	}
+	gqueryResults = append(gqueryResults, result)
 	failures := gquery.All(gqueryResults, false)
 	if failures == 0 {
 		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> gquery")
@@ -223,6 +231,25 @@ func testEndsWith() bool {
 func testStartsWith() bool {
 	return gquery.StartsWith("word_letter_number", "word")
 }
+func testIsDigit() bool {
+	if gquery.IsDigit('c') {
+		return false
+	}
+	if gquery.IsDigit('x') {
+		return false
+	}
+	if gquery.IsDigit('_') {
+		return false
+	}
+	if !gquery.IsDigit('3') {
+		return false
+	}
+	if !gquery.IsDigit('0') {
+		return false
+	}
+	return true
+}
+
 func testDynamicBoxGrid() bool {
 	slice1d := []string{
 		"apple",

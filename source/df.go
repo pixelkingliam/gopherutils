@@ -7,6 +7,7 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"gopherutils/shared/convert"
 	"gopherutils/shared/display"
+	"gopherutils/shared/gquery"
 	"math"
 	"os"
 	"strconv"
@@ -108,7 +109,7 @@ func main() {
 }
 func resolveBlocks(bytes int64, blocks string) int64 {
 	var v int64
-	if isDigit(blocks[len(blocks)-1]) {
+	if gquery.IsDigit(blocks[len(blocks)-1]) {
 		v, _ = strconv.ParseInt(blocks, 10, 64)
 		return bytes / v
 	}
@@ -133,13 +134,11 @@ func resolveBlocks(bytes int64, blocks string) int64 {
 	}
 	return bytes / (v * unitModifier)
 }
-func isDigit(c uint8) bool {
-	return c >= '0' && c <= '9'
-}
+
 func sanitizeBArg(str string) string {
 	var builder strings.Builder
 	for i := 0; i < len(str); i++ {
-		if !isDigit(str[i]) {
+		if !gquery.IsDigit(str[i]) {
 			builder.WriteString(strings.ToLower(string(str[i])))
 			break
 		}
