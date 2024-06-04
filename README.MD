@@ -586,11 +586,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `sleep`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `stat`
 
   ❌ Basic functionality
