@@ -558,11 +558,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `pwd`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `readlink`
 
   ❌ Basic functionality
