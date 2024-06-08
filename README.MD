@@ -458,11 +458,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `false`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `groups`
 
   ❌ Basic functionality
@@ -635,11 +635,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `true`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `tty`
 
   ❌ Basic functionality
