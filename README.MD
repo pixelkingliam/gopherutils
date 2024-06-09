@@ -642,11 +642,11 @@ See `LICENSE`
   ✔️ GNU Compatibility
 * `tty`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `uname`
 
   ❌ Basic functionality
