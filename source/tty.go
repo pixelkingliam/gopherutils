@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"golang.org/x/term"
 	"os"
 )
@@ -15,14 +17,38 @@ func ttyname(fd uintptr) (string, error) {
 	return tty, nil
 }
 func main() {
+	var options struct {
+		Silent bool `short:"s" long:"silent" description:"print nothing, only return an exit status"`
+		Quiet  bool `short:"q" long:"quiet" description:"same as -s"`
+	}
+
+	_, err := flags.ParseArgs(&options, os.Args[1:])
+	if err != nil {
+		if errors.Is(err, flags.ErrHelp) {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
+	}
+	if options.Quiet {
+		options.Silent = true
+	}
 	if term.IsTerminal(int(os.Stdin.Fd())) {
 		result, err := ttyname(os.Stdin.Fd())
 		if err != nil {
-			fmt.Println("Unexpect error!", err.Error())
+			if !options.Silent {
+				fmt.Println("Unexpect error!", err.Error())
+			}
+			os.Exit(0)
 		}
-		fmt.Println(result)
+		if !options.Silent {
+			fmt.Println(result)
+		}
 	} else {
-		fmt.Println("Standard input is not a terminal.")
+		if !options.Silent {
+			fmt.Println("Standard input is not a terminal.")
+		}
+		os.Exit(1)
 	}
 
 }
