@@ -69,6 +69,14 @@ func main() {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.StartsWith(str string, compare string) bool")
 	}
 	gqueryResults = append(gqueryResults, result)
+	// Testing SelectStartsWith
+	result = testResultStartsWith()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.SelectStartsWith(slice []string, comparator string) []string")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.SelectStartsWith(slice []string, comparator string) []string")
+	}
+	gqueryResults = append(gqueryResults, result)
 	// Testing IsDigit
 	result = testIsDigit()
 	if result {
@@ -230,6 +238,24 @@ func testEndsWith() bool {
 }
 func testStartsWith() bool {
 	return gquery.StartsWith("word_letter_number", "word")
+}
+func testResultStartsWith() bool {
+	slice1d := []string{
+		"apple",
+		"application",
+		"App",
+		"elderberry",
+		"fig",
+		"grape",
+		"honeydew",
+		"kiwi",
+		"lemon",
+		"mango",
+		"nectarine",
+		"orange"}
+	return slices.Equal(gquery.SelectStartsWith(slice1d, "app"), []string{
+		"apple",
+		"application"})
 }
 func testIsDigit() bool {
 	if gquery.IsDigit('c') {

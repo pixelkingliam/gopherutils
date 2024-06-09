@@ -47,7 +47,15 @@ func Swap[T any](slice []T, a int, b int) []T {
 	slice[b] = temp
 	return slice
 }
-
+func SelectStartsWith(slice []string, comparator string) []string {
+	var result []string
+	for _, s := range slice {
+		if StartsWith(s, comparator) {
+			result = append(result, s)
+		}
+	}
+	return result
+}
 func QuickSortLen(slice []string) []string {
 	if len(slice) <= 1 {
 		return slice
