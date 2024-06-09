@@ -696,3 +696,10 @@ See `LICENSE`
   ❌ Advanced functionality
 
   ❌ GNU Compatibility
+* `hostname`
+
+  ✔️ Basic functionality
+
+  ❌ Advanced functionality
+
+  ❌ GNU Compatibility
