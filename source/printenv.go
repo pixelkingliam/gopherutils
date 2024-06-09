@@ -22,7 +22,7 @@ func main() {
 	ending := '\n'
 	for _, str := range os.Environ() {
 		if str[:2] != "_=" {
-			fmt.Printf("%s%s", str, ending)
+			fmt.Printf("%s%c", str, ending)
 
 		}
 	}
