@@ -684,11 +684,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `whoami`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `yes`
 
   ❌ Basic functionality
