@@ -12,6 +12,7 @@ import (
 func main() {
 	var options struct {
 		Directory bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
+		DryRun    bool `short:"u" long:"dry-run" description:"Do not create anything. Only prints a name."`
 	}
 
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -27,17 +28,19 @@ func main() {
 	for exists(path) {
 		path = generatePath()
 	}
-	if options.Directory {
-		err := os.Mkdir(path, os.FileMode(0755))
-		if err != nil {
-			fmt.Printf("Unexpected error: %s\n", err.Error())
-			os.Exit(1)
-		}
-	} else {
-		_, err := os.Create(path)
-		if err != nil {
-			fmt.Printf("Unexpected error: %s\n", err.Error())
-			os.Exit(1)
+	if !options.DryRun {
+		if options.Directory {
+			err := os.Mkdir(path, os.FileMode(0755))
+			if err != nil {
+				fmt.Printf("Unexpected error: %s\n", err.Error())
+				os.Exit(1)
+			}
+		} else {
+			_, err := os.Create(path)
+			if err != nil {
+				fmt.Printf("Unexpected error: %s\n", err.Error())
+				os.Exit(1)
+			}
 		}
 	}
 	fmt.Println(path)
