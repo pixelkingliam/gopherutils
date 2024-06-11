@@ -115,7 +115,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `mktemp`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
@@ -463,13 +463,6 @@ See `LICENSE`
   ✔️ Advanced functionality
 
   ✔️ GNU Compatibility
-* `groups`
-
-  ❌ Basic functionality
-
-  ❌ Advanced functionality
-
-  ❌ GNU Compatibility
 * `groups`
 
   ❌ Basic functionality
