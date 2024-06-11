@@ -24,9 +24,18 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	path := generatePath()
+	if len(args) > 1 {
+		fmt.Println("Too many templates")
+		os.Exit(1)
+	}
+	template := "/tmp/tmp.XXXXXXXXXX"
+	if len(args) == 1 {
+		template = args[0]
+	}
+
+	path := generatePath(template)
 	for exists(path) {
-		path = generatePath()
+		path = generatePath(template)
 	}
 	if !options.DryRun {
 		if options.Directory {
@@ -45,14 +54,18 @@ func main() {
 	}
 	fmt.Println(path)
 }
-func generatePath() string {
+func generatePath(template string) string {
 	var builder strings.Builder
 	charSet := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	for i := 0; i < 10; i++ {
-		randomChar := charSet[rand.Intn(len(charSet))]
-		builder.WriteByte(randomChar)
+	for i := 0; i < len(template); i++ {
+		if template[i] == 'X' {
+			randomChar := charSet[rand.Intn(len(charSet))]
+			builder.WriteByte(randomChar)
+		} else {
+			builder.WriteByte(template[i])
+		}
 	}
-	return "/tmp/tmp." + builder.String()
+	return builder.String()
 }
 func exists(path string) bool {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
