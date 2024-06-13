@@ -11,8 +11,9 @@ import (
 
 func main() {
 	var options struct {
-		Directory bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
-		DryRun    bool `short:"u" long:"dry-run" description:"Do not create anything. Only prints a name."`
+		Directory bool   `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
+		DryRun    bool   `short:"u" long:"dry-run" description:"Do not create anything. Only prints a name."`
+		Suffix    string `short:"s" long:"suffix" description:"Append a suffix to the template; The suffix must not contain a slash."`
 	}
 
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -24,6 +25,10 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	if strings.Contains(options.Suffix, "/") {
+		fmt.Println("Suffix contains a slash!")
+		os.Exit(1)
+	}
 	if len(args) > 1 {
 		fmt.Println("Too many templates")
 		os.Exit(1)
@@ -33,9 +38,9 @@ func main() {
 		template = args[0]
 	}
 
-	path := generatePath(template)
+	path := generatePath(template) + options.Suffix
 	for exists(path) {
-		path = generatePath(template)
+		path = generatePath(template) + options.Suffix
 	}
 	if !options.DryRun {
 		if options.Directory {
