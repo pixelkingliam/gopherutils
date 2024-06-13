@@ -17,7 +17,10 @@ func main() {
 	}
 
 	args, err := flags.ParseArgs(&options, os.Args)
-	args = args[1:]
+	if len(args) != 0 {
+		args = args[1:]
+
+	}
 	if err != nil {
 		if errors.Is(err, flags.ErrHelp) {
 			os.Exit(0)
