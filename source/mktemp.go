@@ -14,8 +14,9 @@ func main() {
 		Directory bool   `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
 		DryRun    bool   `short:"u" long:"dry-run" description:"Do not create anything. Only prints a name."`
 		Suffix    string `short:"s" long:"suffix" description:"Append a suffix to the template; The suffix must not contain a slash."`
+		TmpDir    string `short:"p" long:"tmpdir" description:"Interprets the template relative to this. Defaults to /tmp"`
 	}
-
+	options.TmpDir = "/tmp"
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
 		args = args[1:]
@@ -28,6 +29,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
 	if strings.Contains(options.Suffix, "/") {
 		fmt.Println("Suffix contains a slash!")
 		os.Exit(1)
@@ -36,14 +38,14 @@ func main() {
 		fmt.Println("Too many templates")
 		os.Exit(1)
 	}
-	template := "/tmp/tmp.XXXXXXXXXX"
+	template := "/tmp.XXXXXXXXXX"
 	if len(args) == 1 {
 		template = args[0]
 	}
 
-	path := generatePath(template) + options.Suffix
+	path := options.TmpDir + generatePath(template) + options.Suffix
 	for exists(path) {
-		path = generatePath(template) + options.Suffix
+		path = options.TmpDir + generatePath(template) + options.Suffix
 	}
 	if !options.DryRun {
 		if options.Directory {
