@@ -164,7 +164,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `touch`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
