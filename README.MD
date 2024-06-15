@@ -117,9 +117,9 @@ See `LICENSE`
 
   ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `mv`
 
   ✔️ Basic functionality
