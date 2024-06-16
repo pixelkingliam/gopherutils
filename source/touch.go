@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"os"
+	"syscall"
 	"time"
 )
 
 func main() {
 	var options struct {
-		NoCreate bool `short:"c" long:"no-create" description:"Does not create any files."` // GNU Compatible
+		NoCreate         bool `short:"c" long:"no-create" description:"Does not create any files."` // GNU Compatible
+		AccessOnly       bool `short:"a"  description:"Only changes the access time"`               // GNU Compatible
+		ModificationOnly bool `short:"m"  description:"Only changes the modification time"`         // GNU Compatible
 
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -29,7 +32,8 @@ func main() {
 	args = args[1:]
 
 	for _, arg := range args {
-		_, err := os.Stat(arg)
+		stat, err := os.Stat(arg)
+
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				if options.NoCreate {
@@ -46,7 +50,19 @@ func main() {
 				os.Exit(1)
 			}
 		}
-		err = os.Chtimes(arg, time.Now(), time.Now())
+
+		mtime := time.Now()
+		atime := time.Now()
+
+		if options.AccessOnly {
+			mtime = stat.ModTime()
+
+		}
+		if options.ModificationOnly {
+			sysAtime := stat.Sys().(*syscall.Stat_t).Atim
+			atime = time.Unix(sysAtime.Sec, sysAtime.Nsec)
+		}
+		err = os.Chtimes(arg, atime, mtime)
 		if err != nil {
 			fmt.Printf("Unknown error: %s\n", err.Error())
 			os.Exit(1)
