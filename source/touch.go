@@ -10,6 +10,8 @@ import (
 
 func main() {
 	var options struct {
+		NoCreate bool `short:"c" long:"no-create" description:"Does not create any files."` // GNU Compatible
+
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 
@@ -30,11 +32,15 @@ func main() {
 		_, err := os.Stat(arg)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
+				if options.NoCreate {
+					continue
+				}
 				_, err2 := os.Create(arg)
 				if err2 != nil {
 					fmt.Printf("Unknown error: %s\n", err.Error())
 					os.Exit(1)
 				}
+
 			} else {
 				fmt.Printf("Unknown error: %s\n", err.Error())
 				os.Exit(1)
