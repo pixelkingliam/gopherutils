@@ -13,6 +13,7 @@ func main() {
 		Directory      bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
 		Number         bool `short:"n" long:"number" description:"Numbers all output lines"`                                                     // GNU Compatible
 		NumberNonBlank bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines"`                                  // GNU Compatible
+		OmitBlank      bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines"`                                              // GNU Compatible
 
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -46,11 +47,13 @@ func main() {
 			os.Exit(1)
 		}
 		lines = append(lines, strings.Split(string(file), "\n")...)
-		//fmt.Println(string(file))
 
 	}
 	lineCount := 1
 	for i, line := range lines {
+		if len(line) == 0 && options.OmitBlank {
+			continue
+		}
 		if options.Number {
 			lineCountStr := fmt.Sprintf("%v", lineCount)
 			if options.NumberNonBlank {
