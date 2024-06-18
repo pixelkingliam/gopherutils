@@ -199,7 +199,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `cat`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
