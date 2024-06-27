@@ -11,11 +11,12 @@ import (
 func main() {
 	var options struct {
 		Directory      bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
-		Number         bool `short:"n" long:"number" description:"Numbers all output lines"`                                                     // GNU Compatible
-		NumberNonBlank bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines"`                                  // GNU Compatible
-		OmitBlank      bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines"`                                              // GNU Compatible
-		ShowEnds       bool `short:"E" long:"show-ends" description:"Display $ at the end of each line"`                                         // GNU Compatible
-		ShowTabs       bool `short:"T" long:"show-tabs" description:"Displays TAB characters as ^I"`
+		Number         bool `short:"n" long:"number" description:"Numbers all output lines."`                                                    // GNU Compatible
+		NumberNonBlank bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines."`                                 // GNU Compatible
+		OmitBlank      bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines."`                                             // GNU Compatible
+		ShowEnds       bool `short:"E" long:"show-ends" description:"Display $ at the end of each line."`                                        // GNU Compatible
+		ShowTabs       bool `short:"T" long:"show-tabs" description:"Displays TAB characters as ^I."`
+		Ignored        bool `short:"u" long:"ignored" description:"Ignored."`
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
