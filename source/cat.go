@@ -15,6 +15,7 @@ func main() {
 		NumberNonBlank bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines"`                                  // GNU Compatible
 		OmitBlank      bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines"`                                              // GNU Compatible
 		ShowEnds       bool `short:"E" long:"show-ends" description:"Display $ at the end of each line"`                                         // GNU Compatible
+		ShowTabs       bool `short:"T" long:"show-tabs" description:"Displays TAB characters as ^I"`
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -46,7 +47,12 @@ func main() {
 		if err != nil {
 			os.Exit(1)
 		}
-		lines = append(lines, strings.Split(string(file), "\n")...)
+		if options.ShowTabs {
+			lines = append(lines, strings.Replace(string(file), "\n", "^I", -1))
+		} else {
+			lines = append(lines, strings.Split(string(file), "\n")...)
+
+		}
 
 	}
 	lineCount := 1
