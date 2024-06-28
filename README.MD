@@ -5,7 +5,7 @@ Gopherutils is a coreutils-like set of common programs for managing and interact
 
 Run `build.sh` (Unix) or `build.ps1` (Windows) to compile all the programs.
 
-The compiled programs will be placed in ./bin/
+The compiled programs will be placed in ./bin/ and can be run from there.
 
 ## Testing
 
@@ -14,7 +14,16 @@ Testing is done via the test.go program. Near the end of the project it will be 
 
 ## Why
 
-It's open source, and it's rather simple to work on and it tries to limit bloat where reasonable.
+It's open source, and it's rather simple to work on, and it tries to limit bloat where reasonable.
+
+## Contributions
+We welcome contributions to the gopherutils project! Here are some guidelines to help you get started:
+
+* Program Completion: Contributions should focus on completing the listed programs below. Ensure they are fully functional and should aim to be GNU Compatible.
+* Bug Fixes: Identifying and fixing bugs is highly appreciated. Please include detailed descriptions of the issues and the solutions.
+* Minor Features: Suggestions and implementations for minor features that enhance the project's functionality are welcome.
+* Code Style: Maintain consistency with the existing codebase.
+* Communication: Open an issue or join the discussion before significant changes to ensure alignment with the project's direction.
 
 ## Licensing
 
