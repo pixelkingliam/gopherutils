@@ -10,14 +10,15 @@ import (
 
 func main() {
 	var options struct {
-		Directory      bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."` // GNU Compatible
-		Number         bool `short:"n" long:"number" description:"Numbers all output lines."`                                                    // GNU Compatible
-		NumberNonBlank bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines."`                                 // GNU Compatible
-		OmitBlank      bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines."`                                             // GNU Compatible
-		ShowEnds       bool `short:"E" long:"show-ends" description:"Display $ at the end of each line."`                                        // GNU Compatible
-		ShowTabs       bool `short:"T" long:"show-tabs" description:"Displays TAB characters as ^I."`                                            // GNU Compatible
-		Ignored        bool `short:"u" long:"ignored" description:"Ignored."`                                                                    // GNU Compatible
-		SqueezeBlank   bool `short:"s" long:"squeeze-blank" description:"Avoids printing repeated blank lines"`
+		Directory       bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."`                             // GNU Compatible
+		Number          bool `short:"n" long:"number" description:"Numbers all output lines."`                                                                                // GNU Compatible
+		NumberNonBlank  bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines."`                                                             // GNU Compatible
+		OmitBlank       bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines."`                                                                         // GNU Compatible
+		ShowEnds        bool `short:"E" long:"show-ends" description:"Display $ at the end of each line."`                                                                    // GNU Compatible
+		ShowTabs        bool `short:"T" long:"show-tabs" description:"Displays TAB characters as ^I."`                                                                        // GNU Compatible
+		Ignored         bool `short:"u" long:"ignored" description:"Ignored."`                                                                                                // GNU Compatible
+		SqueezeBlank    bool `short:"s" long:"squeeze-blank" description:"Avoids printing repeated blank lines"`                                                              // GNU Compatible
+		ShowNonPrinting bool `short:"v" long:"show-nonprinting" description:"Prints control characters and meta characters using ^ and M- notation, except for LFD and TAB."` // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -49,7 +50,9 @@ func main() {
 		if err != nil {
 			os.Exit(1)
 		}
-
+		if options.ShowNonPrinting {
+			file = []byte(processNonPrinting(string(file)))
+		}
 		if options.ShowTabs {
 			lines = append(lines, strings.Split(strings.Replace(string(file), "\t", "^I", -1), "\n")...)
 		} else {
@@ -97,6 +100,43 @@ func main() {
 		if options.ShowEnds {
 			fmt.Printf("$")
 		}
-		fmt.Printf("\n")
+		if i != len(lines) {
+			fmt.Printf("\n")
+		}
 	}
+}
+func processNonPrinting(str string) string {
+	var output strings.Builder
+	for i := 0; i < len(str); i++ {
+		char := str[i]
+		if char == 127 {
+			output.WriteByte('^')
+			output.WriteByte('?')
+			continue
+		}
+		if char <= 31 {
+			// print TAB and Newline, otherwise represent control character with ^ notation
+			if char != '\t' && char != '\n' {
+				output.WriteByte('^')
+				output.WriteByte(char + 64)
+				continue
+			}
+		}
+		if char == 255 {
+			output.WriteByte('M')
+			output.WriteByte('-')
+			output.WriteByte('?')
+			continue
+		}
+		if char > 127 {
+			output.WriteByte('M')
+			output.WriteByte('-')
+			// convert meta character into ASCII character, then plus +64 to assure printable
+			output.WriteByte(char - 128 + 64)
+			continue
+		}
+		output.WriteByte(char)
+
+	}
+	return output.String()
 }
