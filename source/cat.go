@@ -19,6 +19,7 @@ func main() {
 		Ignored         bool `short:"u" long:"ignored" description:"Ignored."`                                                                                                // GNU Compatible
 		SqueezeBlank    bool `short:"s" long:"squeeze-blank" description:"Avoids printing repeated blank lines"`                                                              // GNU Compatible
 		ShowNonPrinting bool `short:"v" long:"show-nonprinting" description:"Prints control characters and meta characters using ^ and M- notation, except for LFD and TAB."` // GNU Compatible
+		vE              bool `short:"e" description:"Equivalent to -vE"`                                                                                                      // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -34,6 +35,10 @@ func main() {
 	}
 	if options.NumberNonBlank {
 		options.Number = true
+	}
+	if options.vE {
+		options.ShowNonPrinting = true
+		options.ShowEnds = true
 	}
 	var lines []string
 	for _, arg := range args {
