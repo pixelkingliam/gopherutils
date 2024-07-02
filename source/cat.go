@@ -13,13 +13,14 @@ func main() {
 		Directory       bool `short:"d" long:"parents" description:"No errors if existing, also creates necessary parent directories as needed."`                             // GNU Compatible
 		Number          bool `short:"n" long:"number" description:"Numbers all output lines."`                                                                                // GNU Compatible
 		NumberNonBlank  bool `short:"b" long:"number-nonblank" description:"Numbers all non-blank output lines."`                                                             // GNU Compatible
-		OmitBlank       bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines."`                                                                         // GNU Compatible
+		OmitBlank       bool `short:"o" long:"omit-blank" description:"Avoids printing blank lines."`                                                                         // GNU Compatible Addition
 		ShowEnds        bool `short:"E" long:"show-ends" description:"Display $ at the end of each line."`                                                                    // GNU Compatible
 		ShowTabs        bool `short:"T" long:"show-tabs" description:"Displays TAB characters as ^I."`                                                                        // GNU Compatible
 		Ignored         bool `short:"u" long:"ignored" description:"Ignored."`                                                                                                // GNU Compatible
 		SqueezeBlank    bool `short:"s" long:"squeeze-blank" description:"Avoids printing repeated blank lines"`                                                              // GNU Compatible
 		ShowNonPrinting bool `short:"v" long:"show-nonprinting" description:"Prints control characters and meta characters using ^ and M- notation, except for LFD and TAB."` // GNU Compatible
-		vE              bool `short:"e" description:"Equivalent to -vE"`                                                                                                      // GNU Compatible
+		VE              bool `short:"e" description:"Equivalent to -VE"`                                                                                                      // GNU Compatible
+		VT              bool `short:"t" description:"Equivalent to -VT"`                                                                                                      // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -36,9 +37,13 @@ func main() {
 	if options.NumberNonBlank {
 		options.Number = true
 	}
-	if options.vE {
+	if options.VE {
 		options.ShowNonPrinting = true
 		options.ShowEnds = true
+	}
+	if options.VT {
+		options.ShowNonPrinting = true
+		options.ShowTabs = true
 	}
 	var lines []string
 	for _, arg := range args {
