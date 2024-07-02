@@ -19,8 +19,8 @@ func main() {
 		Ignored         bool `short:"u" long:"ignored" description:"Ignored."`                                                                                                // GNU Compatible
 		SqueezeBlank    bool `short:"s" long:"squeeze-blank" description:"Avoids printing repeated blank lines"`                                                              // GNU Compatible
 		ShowNonPrinting bool `short:"v" long:"show-nonprinting" description:"Prints control characters and meta characters using ^ and M- notation, except for LFD and TAB."` // GNU Compatible
-		VE              bool `short:"e" description:"Equivalent to -VE"`                                                                                                      // GNU Compatible
-		VT              bool `short:"t" description:"Equivalent to -VT"`                                                                                                      // GNU Compatible
+		VE              bool `short:"e" description:"Equivalent to -vE"`                                                                                                      // GNU Compatible
+		VT              bool `short:"t" description:"Equivalent to -vT"`                                                                                                      // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
