@@ -21,6 +21,7 @@ func main() {
 		ShowNonPrinting bool `short:"v" long:"show-nonprinting" description:"Prints control characters and meta characters using ^ and M- notation, except for LFD and TAB."` // GNU Compatible
 		VE              bool `short:"e" description:"Equivalent to -vE"`                                                                                                      // GNU Compatible
 		VT              bool `short:"t" description:"Equivalent to -vT"`                                                                                                      // GNU Compatible
+		A               bool `short:"A" long:"show-all" description:"Equivalent to -vET"`                                                                                     // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -45,6 +46,11 @@ func main() {
 		options.ShowNonPrinting = true
 		options.ShowTabs = true
 	}
+	if options.A {
+		options.ShowNonPrinting = true
+		options.ShowTabs = true
+		options.ShowEnds = true
+	}
 	var lines []string
 	for _, arg := range args {
 		_, err := os.Stat(arg)
@@ -62,6 +68,9 @@ func main() {
 		}
 		if options.ShowNonPrinting {
 			file = []byte(processNonPrinting(string(file)))
+		}
+		if options.ShowEnds {
+			file = []byte(strings.Replace(string(file), "\n", "$\n", -1))
 		}
 		if options.ShowTabs {
 			lines = append(lines, strings.Split(strings.Replace(string(file), "\t", "^I", -1), "\n")...)
@@ -107,9 +116,7 @@ func main() {
 			fmt.Printf(line)
 
 		}
-		if options.ShowEnds {
-			fmt.Printf("$")
-		}
+
 		if i != len(lines) {
 			fmt.Printf("\n")
 		}
@@ -149,4 +156,4 @@ func processNonPrinting(str string) string {
 
 	}
 	return output.String()
-}
+} // TODO -E or -v bug, additional $ at end of file in go.mod
