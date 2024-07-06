@@ -278,7 +278,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `md5sum`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
