@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var options struct {
-		// GNU Compatible
+		Zero bool `short:"z" long:"zero" description:"Ends each output with a NUL character instead of a newline character."` // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -23,6 +23,10 @@ func main() {
 		} else {
 			os.Exit(1)
 		}
+	}
+	ending := "\n"
+	if options.Zero {
+		ending = "\x00"
 	}
 	for _, arg := range args {
 		_, err := os.Stat(arg)
@@ -38,7 +42,8 @@ func main() {
 		if err != nil {
 			os.Exit(1)
 		}
-		fmt.Printf("%x%s\n", md5.Sum(file), arg)
+
+		fmt.Printf("%x%s%s", md5.Sum(file), arg, ending)
 	}
 
 }
