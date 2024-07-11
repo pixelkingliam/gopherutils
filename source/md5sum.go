@@ -31,7 +31,7 @@ func main() {
 	}
 	prefix := " "
 	if options.Binary {
-		prefix = " *"
+		prefix = "*"
 	}
 	for _, arg := range args {
 		_, err := os.Stat(arg)
@@ -48,7 +48,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Printf("%x%s%s%s", md5.Sum(file), prefix, arg, ending)
+		fmt.Printf("%x %s%s%s", md5.Sum(file), prefix, arg, ending)
 	}
 
 }
