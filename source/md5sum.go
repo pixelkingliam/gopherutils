@@ -12,6 +12,7 @@ func main() {
 	var options struct {
 		Zero   bool `short:"z" long:"zero" description:"Ends each output with a NUL character instead of a newline character."` // GNU Compatible
 		Binary bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                  // GNU Compatible
+		Tag    bool `long:"tag" description:"Writes BSD-style checksums."`                                                      // GNU Compatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -47,8 +48,11 @@ func main() {
 		if err != nil {
 			os.Exit(1)
 		}
-
-		fmt.Printf("%x %s%s%s", md5.Sum(file), prefix, arg, ending)
+		if options.Tag {
+			fmt.Printf("MD5 (%s) = %x%s", arg, md5.Sum(file), ending)
+		} else {
+			fmt.Printf("%x %s%s%s", md5.Sum(file), prefix, arg, ending)
+		}
 	}
 
 }
