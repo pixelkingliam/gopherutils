@@ -17,6 +17,7 @@ func main() {
 		Tag    bool `long:"tag" description:"Writes BSD-style checksums."`                                                      // GNU Compatible
 		Check  bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                        // GNU Compatible
 		Warn   bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                          // GNU Compatible
+		Status bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                  // GNU Compatible
 	}
 	options.Text = true
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -47,6 +48,10 @@ func main() {
 			fmt.Printf("The --warn/-w option depends on --check.\n see --help for more information.\n")
 			os.Exit(1)
 		}
+		if options.Status {
+			fmt.Printf("The --status/-s option depends on --check.\n see --help for more information.\n")
+			os.Exit(1)
+		}
 	}
 	if options.Check {
 		failed := 0
@@ -62,12 +67,12 @@ func main() {
 					fmt.Printf("%s: No such file.\n", file)
 				}
 
-				return
+				os.Exit(1)
 			}
 			data, err := os.ReadFile(file)
 			if err != nil {
 				fmt.Printf("Unknown error! %s", err)
-				return
+				os.Exit(1)
 			}
 			lines := strings.Split(string(data), "\n")
 			for atLine, line := range lines {
@@ -76,20 +81,14 @@ func main() {
 				}
 				hash := line[:32]
 				if len(line) < 35 || !strings.Contains(line, " ") || len(strings.Split(line, " ")[0]) != 32 {
-					if options.Warn {
+					if options.Warn && !options.Status {
 						fmt.Printf("Line %v is improperly formatted.\n", atLine+1)
 					}
 					malformat++
 					continue
 				}
 				hashFilePath := line[34:]
-				//hashFilePath = hashFilePath[1:]
-				/*var hashFilePath string
-				if strings.Split(line, " ")[1] == "" {
-					hashFilePath = strings.Split(line, " ")[2]
-				} else {
-					hashFilePath = strings.Split(line, " ")[1][1:]
-				}*/
+
 				_, err = os.Stat(hashFilePath)
 				if err != nil {
 					if errors.Is(err, os.ErrNotExist) {
@@ -102,22 +101,26 @@ func main() {
 				hashFile, err := os.ReadFile(hashFilePath)
 				if err != nil {
 					fmt.Printf("Unknown error reading file! %s", err)
-					return
+					os.Exit(1)
 				}
 				if hash == fmt.Sprintf("%x", md5.Sum(hashFile)) {
-					fmt.Printf("%s: OK\n", hashFilePath)
+					if !options.Status {
+						fmt.Printf("%s: OK\n", hashFilePath)
+					}
 				} else {
 					failed++
-					fmt.Printf("%s: FAILED\n", hashFilePath)
+					if !options.Status {
+						fmt.Printf("%s: FAILED\n", hashFilePath)
+					}
 				}
 			}
 		}
 		exit := 0
-		if failed != 0 {
+		if failed != 0 && !options.Status {
 			fmt.Printf("WARNING: %v checksum did NOT match\n", failed)
 			exit = 1
 		}
-		if malformat != 0 {
+		if malformat != 0 && !options.Status {
 			fmt.Printf("WARNING: %v line is improperly formatted.\n", malformat)
 			exit = 1
 		}
