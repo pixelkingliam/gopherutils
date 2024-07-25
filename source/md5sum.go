@@ -11,14 +11,15 @@ import (
 
 func main() {
 	var options struct {
-		Zero   bool `short:"z" long:"zero" description:"Ends each output with a NUL character instead of a newline character."` // GNU Compatible
-		Binary bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                  // GNU Compatible
-		Text   bool `short:"t" long:"text" description:"Reads in text mode."`                                                   // GNU Compatible
-		Tag    bool `long:"tag" description:"Writes BSD-style checksums."`                                                      // GNU Compatible
-		Check  bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                        // GNU Compatible
-		Warn   bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                          // GNU Compatible
-		Status bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                  // GNU Compatible
-		Quiet  bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`          // GNU Compatible
+		Zero          bool `short:"z" long:"zero" description:"Ends each output with a NUL character instead of a newline character."` // GNU Compatible
+		Binary        bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                  // GNU Compatible
+		Text          bool `short:"t" long:"text" description:"Reads in text mode."`                                                   // GNU Compatible
+		Tag           bool `long:"tag" description:"Writes BSD-style checksums."`                                                      // GNU Compatible
+		Check         bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                        // GNU Compatible
+		Warn          bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                          // GNU Compatible
+		Status        bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                  // GNU Compatible
+		Quiet         bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`          // GNU Compatible
+		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                       // GNU Compatible
 	}
 	options.Text = true
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -56,22 +57,20 @@ func main() {
 	}
 	if options.Check {
 		failed := 0
-		malformat := 0
+		malFormatted := 0
+		notExist := 0
 		if options.Tag {
 			fmt.Printf("--tag option is incompatible with --check.\n")
 			return
 		}
 		for _, file := range args {
-			_, err = os.Stat(file)
-			if err != nil {
-				if errors.Is(err, os.ErrNotExist) {
-					fmt.Printf("%s: No such file.\n", file)
-				}
-
-				os.Exit(1)
-			}
 			data, err := os.ReadFile(file)
 			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					fmt.Printf("File '%s' does not exist", file)
+					os.Exit(1)
+				}
+
 				fmt.Printf("Unknown error! %s", err)
 				os.Exit(1)
 			}
@@ -85,19 +84,20 @@ func main() {
 					if options.Warn && !options.Status {
 						fmt.Printf("Line %v is improperly formatted.\n", atLine+1)
 					}
-					malformat++
+					malFormatted++
 					continue
 				}
 				hashFilePath := line[34:]
 
 				_, err = os.Stat(hashFilePath)
 				if err != nil {
-					if errors.Is(err, os.ErrNotExist) {
-						fmt.Printf("File '%s' does not exist", hashFilePath)
-						os.Exit(1)
+
+					if !options.IgnoreMissing {
+						fmt.Printf("%s: FAILED open or read\n", hashFilePath)
+						notExist++
 					}
-					fmt.Printf("Unknown error! %s", err)
-					os.Exit(1)
+					continue
+
 				}
 				hashFile, err := os.ReadFile(hashFilePath)
 				if err != nil {
@@ -121,8 +121,12 @@ func main() {
 			fmt.Printf("WARNING: %v checksum did NOT match\n", failed)
 			exit = 1
 		}
-		if malformat != 0 && !options.Status {
-			fmt.Printf("WARNING: %v line is improperly formatted.\n", malformat)
+		if malFormatted != 0 && !options.Status {
+			fmt.Printf("WARNING: %v line is improperly formatted.\n", malFormatted)
+			exit = 1
+		}
+		if notExist != 0 && !options.Status {
+			fmt.Printf("WARNING: %v listed file could not bread.\n", notExist)
 			exit = 1
 		}
 		os.Exit(exit)
