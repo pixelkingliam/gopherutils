@@ -18,6 +18,7 @@ func main() {
 		Check  bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                        // GNU Compatible
 		Warn   bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                          // GNU Compatible
 		Status bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                  // GNU Compatible
+		Quiet  bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`          // GNU Compatible
 	}
 	options.Text = true
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -104,7 +105,7 @@ func main() {
 					os.Exit(1)
 				}
 				if hash == fmt.Sprintf("%x", md5.Sum(hashFile)) {
-					if !options.Status {
+					if !options.Status && !options.Quiet {
 						fmt.Printf("%s: OK\n", hashFilePath)
 					}
 				} else {

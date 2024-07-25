@@ -280,7 +280,7 @@ See `LICENSE`
 
   ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
   ❌ GNU Compatibility
 * `nl`
