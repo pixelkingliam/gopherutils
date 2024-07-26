@@ -20,6 +20,7 @@ func main() {
 		Status        bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                  // GNU Compatible
 		Quiet         bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`          // GNU Compatible
 		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                       // GNU Compatible
+		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`              // GNU Compatible
 	}
 	options.Text = true
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -123,7 +124,9 @@ func main() {
 		}
 		if malFormatted != 0 && !options.Status {
 			fmt.Printf("WARNING: %v line is improperly formatted.\n", malFormatted)
-			exit = 1
+			if options.Strict {
+				exit = 1
+			}
 		}
 		if notExist != 0 && !options.Status {
 			fmt.Printf("WARNING: %v listed file could not bread.\n", notExist)
