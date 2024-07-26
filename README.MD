@@ -282,7 +282,7 @@ See `LICENSE`
 
   ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `nl`
 
   ❌ Basic functionality
