@@ -313,7 +313,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `shasum`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 

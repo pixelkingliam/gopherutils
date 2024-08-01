@@ -12,10 +12,11 @@ import (
 
 func main() {
 	var options struct {
-		Algorithm int  `short:"a" long:"algorithm" description:"Selects the SHA algorithm to use, available options:1 (Default)\n224\n256\n384\n512\n512224\n512256"` // GNU Compatible
-		Binary    bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                                                     // GNU Compatible
-		Text      bool `short:"t" long:"text" description:"Reads in text mode."`                                                                                      // GNU Compatible
-		Tag       bool `short:"T" long:"tag" description:"Writes BSD-style checksums."`                                                                               // GNU Compatible
+		Algorithm int  `short:"a" long:"algorithm" description:"Selects the SHA algorithm to use, available options:1 (Default)\n224\n256\n384\n512\n512224\n512256"`                   // GNU Compatible
+		Binary    bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                                                                       // GNU Compatible
+		Text      bool `short:"t" long:"text" description:"Reads in text mode."`                                                                                                        // GNU Compatible
+		Tag       bool `short:"T" long:"tag" description:"Writes BSD-style checksums."`                                                                                                 // GNU Compatible
+		BitsMode  bool `short:"0" long:"01" description:"Reads in BITS mode.\nASCII '0' is interpreted as 0-bit\nASCII '1' is interpreted as 1-bit\nAll other characters are ignored."` // GNU Compatible
 
 	}
 	options.Text = true
@@ -43,6 +44,10 @@ func main() {
 	} else {
 		for i := 0; i < len(args); i++ {
 			file, err := os.ReadFile(args[i])
+			if options.BitsMode {
+				file = readBitsMode(file)
+			}
+
 			if err != nil {
 				fmt.Println("Error reading file:", err)
 				continue
@@ -52,7 +57,43 @@ func main() {
 	}
 
 }
+func readBitsMode(data []byte) []byte {
+	var length = 0
+	for _, b := range data {
+		if b != '1' && b != '0' {
+			continue
+		}
+		length++
+	}
+	var bytes = make([]byte, (length+7)/8)
 
+	var tByte = uint8(0)
+	var iByte = 0
+	var iBit = 0
+	for _, b := range data {
+		if b != '1' && b != '0' {
+			continue
+		}
+		if b == '1' {
+			tByte |= 1 << (7 - iBit)
+		}
+		iBit++
+
+		if iBit == 8 {
+			iBit = 0
+			bytes[iByte] = tByte
+			tByte = uint8(0)
+			iByte++
+		}
+	}
+	if iBit != 0 {
+		bytes[iByte] = tByte
+	}
+	for _, b := range bytes {
+		fmt.Printf("%08b\n", b)
+	}
+	return bytes
+}
 func checkAlgo(algorithm int) bool {
 	switch algorithm {
 	case 1:
