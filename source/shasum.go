@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -17,6 +18,7 @@ func main() {
 		Text      bool `short:"t" long:"text" description:"Reads in text mode."`                                                                                                        // GNU Compatible
 		Tag       bool `short:"T" long:"tag" description:"Writes BSD-style checksums."`                                                                                                 // GNU Compatible
 		BitsMode  bool `short:"0" long:"01" description:"Reads in BITS mode.\nASCII '0' is interpreted as 0-bit\nASCII '1' is interpreted as 1-bit\nAll other characters are ignored."` // GNU Compatible
+		Universal bool `short:"U" long:"UNIVERSAL" description:"Reads in Universal newlines mode.\n\tNormalizes different newline formats to LF ('\n')"`                                // GNU Compatible
 
 	}
 	options.Text = true
@@ -47,7 +49,10 @@ func main() {
 			if options.BitsMode {
 				file = readBitsMode(file)
 			}
-
+			if options.Universal {
+				file = bytes.Replace(file, []byte{'\r', '\n'}, []byte{'\n'}, -1)
+				file = bytes.Replace(file, []byte{'\r'}, []byte{'\n'}, -1)
+			}
 			if err != nil {
 				fmt.Println("Error reading file:", err)
 				continue
