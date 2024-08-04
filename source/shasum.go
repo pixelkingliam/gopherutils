@@ -41,6 +41,13 @@ func main() {
 		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
 		os.Exit(1)
 	}
+	mode := 0
+	if options.Binary {
+		mode = 1
+	}
+	if options.BitsMode {
+		mode = 2
+	}
 	if false {
 		// TODO CHECK ARG
 	} else {
@@ -57,7 +64,8 @@ func main() {
 				fmt.Println("Error reading file:", err)
 				continue
 			}
-			fmt.Printf("%s%s", formatHash(options.Algorithm, file, options.Tag, args[i]), "\n")
+
+			fmt.Printf("%s%s", formatHash(options.Algorithm, file, options.Tag, args[i], mode), "\n")
 		}
 	}
 
@@ -162,8 +170,15 @@ func getHash(algorithm int, data []byte) (string, error) {
 
 	}
 }
-func formatHash(algorithm int, data []byte, tag bool, fileName string) string {
+func formatHash(algorithm int, data []byte, tag bool, fileName string, mode int) string {
 	hash, err := getHash(algorithm, data)
+	indicator := " "
+	if mode == 1 {
+		indicator = "*"
+	}
+	if mode == 2 {
+		indicator = "^"
+	}
 	if err != nil {
 		fmt.Printf("Error getting hash for %s: %s\n", fileName, err)
 		os.Exit(1)
@@ -171,6 +186,6 @@ func formatHash(algorithm int, data []byte, tag bool, fileName string) string {
 	if tag {
 		return fmt.Sprintf("%s (%s) = %s", algoString(algorithm), fileName, hash)
 	} else {
-		return fmt.Sprintf("%s  %s", hash, fileName)
+		return fmt.Sprintf("%s %s%s", hash, indicator, fileName)
 	}
 }
