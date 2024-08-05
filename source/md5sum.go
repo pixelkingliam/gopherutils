@@ -55,6 +55,18 @@ func main() {
 			fmt.Printf("The --status/-s option depends on --check.\n see --help for more information.\n")
 			os.Exit(1)
 		}
+		if options.Quiet {
+			fmt.Printf("The --quiet/-q option depends on --check.\n see --help for more information.\n")
+			os.Exit(1)
+		}
+		if options.IgnoreMissing {
+			fmt.Printf("The --ignore-missing/-i option depends on --check.\n see --help for more information.\n")
+			os.Exit(1)
+		}
+		if options.Strict {
+			fmt.Printf("The --strict/-S option depends on --check.\n see --help for more information.\n")
+			os.Exit(1)
+		}
 	}
 	if options.Check {
 		failed := 0
