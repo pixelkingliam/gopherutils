@@ -317,7 +317,7 @@ See `LICENSE`
 
   ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `shuf`
 
   ❌ Basic functionality
