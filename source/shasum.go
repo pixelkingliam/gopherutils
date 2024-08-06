@@ -136,7 +136,6 @@ func main() {
 			exit = 1
 		}
 		os.Exit(exit)
-		// TODO CHECK ARG
 	} else {
 		for i := 0; i < len(args); i++ {
 			file, err := os.ReadFile(args[i])
@@ -165,7 +164,7 @@ func readBitsMode(data []byte) []byte {
 		}
 		length++
 	}
-	var bytes = make([]byte, (length+7)/8)
+	var outBytes = make([]byte, (length+7)/8)
 
 	var tByte = uint8(0)
 	var iByte = 0
@@ -181,18 +180,18 @@ func readBitsMode(data []byte) []byte {
 
 		if iBit == 8 {
 			iBit = 0
-			bytes[iByte] = tByte
+			outBytes[iByte] = tByte
 			tByte = uint8(0)
 			iByte++
 		}
 	}
 	if iBit != 0 {
-		bytes[iByte] = tByte
+		outBytes[iByte] = tByte
 	}
-	for _, b := range bytes {
+	for _, b := range outBytes {
 		fmt.Printf("%08b\n", b)
 	}
-	return bytes
+	return outBytes
 }
 func lengthAlgo(algorithm int) int {
 	switch algorithm {
