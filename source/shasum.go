@@ -27,8 +27,9 @@ func main() {
 		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                                                                            // GNU Compatible
 		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`                                                                   // GNU Compatible
 	}
+	autoDetect := true
 	options.Text = true
-	options.Algorithm = 1
+	options.Algorithm = -1
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
 		args = args[1:]
@@ -42,7 +43,11 @@ func main() {
 			os.Exit(1)
 		}
 	}
-
+	if options.Algorithm != -1 {
+		autoDetect = false
+	} else {
+		options.Algorithm = 1
+	}
 	if !checkAlgo(options.Algorithm) {
 		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
 		os.Exit(1)
@@ -77,6 +82,9 @@ func main() {
 			for atLine, line := range lines {
 				if line == "" {
 					continue
+				}
+				if autoDetect {
+					options.Algorithm = algoFromLength(len(strings.Split(line, " ")[0]))
 				}
 				hashLength := lengthAlgo(options.Algorithm)
 				hash := line[:hashLength]
@@ -212,6 +220,22 @@ func lengthAlgo(algorithm int) int {
 	default:
 		return -1
 
+	}
+}
+func algoFromLength(length int) int {
+	switch length {
+	case 40:
+		return 1
+	case 56:
+		return 224 // or 512224
+	case 64:
+		return 256 // or 512256
+	case 96:
+		return 384
+	case 128:
+		return 512
+	default:
+		return -1
 	}
 }
 func checkAlgo(algorithm int) bool {
