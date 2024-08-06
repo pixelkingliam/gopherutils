@@ -9,17 +9,23 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"os"
+	"strings"
 )
 
 func main() {
 	var options struct {
-		Algorithm int  `short:"a" long:"algorithm" description:"Selects the SHA algorithm to use, available options:1 (Default)\n224\n256\n384\n512\n512224\n512256"`                   // GNU Compatible
-		Binary    bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                                                                       // GNU Compatible
-		Text      bool `short:"t" long:"text" description:"Reads in text mode."`                                                                                                        // GNU Compatible
-		Tag       bool `short:"T" long:"tag" description:"Writes BSD-style checksums."`                                                                                                 // GNU Compatible
-		BitsMode  bool `short:"0" long:"01" description:"Reads in BITS mode.\nASCII '0' is interpreted as 0-bit\nASCII '1' is interpreted as 1-bit\nAll other characters are ignored."` // GNU Compatible
-		Universal bool `short:"U" long:"UNIVERSAL" description:"Reads in Universal newlines mode.\n\tNormalizes different newline formats to LF ('\n')"`                                // GNU Compatible
-
+		Algorithm     int  `short:"a" long:"algorithm" description:"Selects the SHA algorithm to use, available options:1 (Default)\n224\n256\n384\n512\n512224\n512256"`                   // GNU Compatible
+		Binary        bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                                                                       // GNU Compatible
+		Text          bool `short:"t" long:"text" description:"Reads in text mode."`                                                                                                        // GNU Compatible
+		Tag           bool `short:"T" long:"tag" description:"Writes BSD-style checksums."`                                                                                                 // GNU Compatible
+		BitsMode      bool `short:"0" long:"01" description:"Reads in BITS mode.\nASCII '0' is interpreted as 0-bit\nASCII '1' is interpreted as 1-bit\nAll other characters are ignored."` // GNU Compatible
+		Universal     bool `short:"U" long:"UNIVERSAL" description:"Reads in Universal newlines mode.\n\tNormalizes different newline formats to LF ('\n')"`                                // GNU Compatible
+		Check         bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                                                                             // GNU Compatible
+		Warn          bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                                                                               // GNU Compatible
+		Status        bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                                                                       // GNU Compatible
+		Quiet         bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`                                                               // GNU Compatible
+		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                                                                            // GNU Compatible
+		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`                                                                   // GNU Compatible
 	}
 	options.Text = true
 	options.Algorithm = 1
@@ -48,7 +54,88 @@ func main() {
 	if options.BitsMode {
 		mode = 2
 	}
-	if false {
+	if options.Check {
+		failed := 0
+		malFormatted := 0
+		notExist := 0
+		if options.Tag {
+			fmt.Printf("--tag option is incompatible with --check.\n")
+			return
+		}
+		for _, file := range args {
+			data, err := os.ReadFile(file)
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					fmt.Printf("File '%s' does not exist", file)
+					os.Exit(1)
+				}
+
+				fmt.Printf("Unknown error! %s", err)
+				os.Exit(1)
+			}
+			lines := strings.Split(string(data), "\n")
+			for atLine, line := range lines {
+				if line == "" {
+					continue
+				}
+				hashLength := lengthAlgo(options.Algorithm)
+				hash := line[:hashLength]
+				if len(line) < hashLength+3 || !strings.Contains(line, " ") || len(strings.Split(line, " ")[0]) != hashLength {
+					if options.Warn && !options.Status {
+						fmt.Printf("Line %v is improperly formatted.\n", atLine+1)
+					}
+					malFormatted++
+					continue
+				}
+				hashFilePath := line[hashLength+2:]
+				_, err = os.Stat(hashFilePath)
+				if err != nil {
+
+					if !options.IgnoreMissing {
+						fmt.Printf("%s: FAILED open or read\n", hashFilePath)
+						notExist++
+					}
+					continue
+
+				}
+				hashFile, err := os.ReadFile(hashFilePath)
+				if err != nil {
+					fmt.Printf("Unknown error reading file! %s", err)
+					os.Exit(1)
+				}
+				calculated, err := getHash(options.Algorithm, hashFile)
+				if err != nil {
+					fmt.Printf("Unknown error calculating hash.")
+					os.Exit(1)
+				}
+				if hash == calculated {
+					if !options.Status && !options.Quiet {
+						fmt.Printf("%s: OK\n", hashFilePath)
+					}
+				} else {
+					failed++
+					if !options.Status {
+						fmt.Printf("%s: FAILED\n", hashFilePath)
+					}
+				}
+			}
+		}
+		exit := 0
+		if failed != 0 && !options.Status {
+			fmt.Printf("WARNING: %v checksum did NOT match\n", failed)
+			exit = 1
+		}
+		if malFormatted != 0 && !options.Status {
+			fmt.Printf("WARNING: %v line is improperly formatted.\n", malFormatted)
+			if options.Strict {
+				exit = 1
+			}
+		}
+		if notExist != 0 && !options.Status {
+			fmt.Printf("WARNING: %v listed file could not bread.\n", notExist)
+			exit = 1
+		}
+		os.Exit(exit)
 		// TODO CHECK ARG
 	} else {
 		for i := 0; i < len(args); i++ {
@@ -106,6 +193,27 @@ func readBitsMode(data []byte) []byte {
 		fmt.Printf("%08b\n", b)
 	}
 	return bytes
+}
+func lengthAlgo(algorithm int) int {
+	switch algorithm {
+	case 1:
+		return 40
+	case 224:
+		return 56
+	case 256:
+		return 64
+	case 384:
+		return 96
+	case 512:
+		return 128
+	case 512224:
+		return 56
+	case 512256:
+		return 64
+	default:
+		return -1
+
+	}
 }
 func checkAlgo(algorithm int) bool {
 	switch algorithm {
