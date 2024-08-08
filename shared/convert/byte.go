@@ -141,3 +141,40 @@ func ToSI[T constraints.Integer](value T, round bool) string {
 		return fmt.Sprintf("%v B", value)
 	}
 }
+func ReadAsciiBits(data []byte) []byte {
+	var length = 0
+	for _, b := range data {
+		if b != '1' && b != '0' {
+			continue
+		}
+		length++
+	}
+	var outBytes = make([]byte, (length+7)/8)
+
+	var tByte = uint8(0)
+	var iByte = 0
+	var iBit = 0
+	for _, b := range data {
+		if b != '1' && b != '0' {
+			continue
+		}
+		if b == '1' {
+			tByte |= 1 << (7 - iBit)
+		}
+		iBit++
+
+		if iBit == 8 {
+			iBit = 0
+			outBytes[iByte] = tByte
+			tByte = uint8(0)
+			iByte++
+		}
+	}
+	if iBit != 0 {
+		outBytes[iByte] = tByte
+	}
+	for _, b := range outBytes {
+		fmt.Printf("%08b\n", b)
+	}
+	return outBytes
+}

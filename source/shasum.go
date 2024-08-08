@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"gopherutils/shared/convert"
 	"os"
 	"strings"
 )
@@ -148,7 +149,7 @@ func main() {
 		for i := 0; i < len(args); i++ {
 			file, err := os.ReadFile(args[i])
 			if options.BitsMode {
-				file = shaReadBitsMode(file)
+				file = convert.ReadAsciiBits(file)
 			}
 			if options.Universal {
 				file = bytes.Replace(file, []byte{'\r', '\n'}, []byte{'\n'}, -1)
@@ -163,43 +164,6 @@ func main() {
 		}
 	}
 
-}
-func shaReadBitsMode(data []byte) []byte {
-	var length = 0
-	for _, b := range data {
-		if b != '1' && b != '0' {
-			continue
-		}
-		length++
-	}
-	var outBytes = make([]byte, (length+7)/8)
-
-	var tByte = uint8(0)
-	var iByte = 0
-	var iBit = 0
-	for _, b := range data {
-		if b != '1' && b != '0' {
-			continue
-		}
-		if b == '1' {
-			tByte |= 1 << (7 - iBit)
-		}
-		iBit++
-
-		if iBit == 8 {
-			iBit = 0
-			outBytes[iByte] = tByte
-			tByte = uint8(0)
-			iByte++
-		}
-	}
-	if iBit != 0 {
-		outBytes[iByte] = tByte
-	}
-	for _, b := range outBytes {
-		fmt.Printf("%08b\n", b)
-	}
-	return outBytes
 }
 func shaLengthAlgo(algorithm int) int {
 	switch algorithm {
