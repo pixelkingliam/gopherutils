@@ -48,7 +48,7 @@ func main() {
 	} else {
 		options.Algorithm = 1
 	}
-	if !checkAlgo(options.Algorithm) {
+	if !shaCheckAlgo(options.Algorithm) {
 		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
 		os.Exit(1)
 	}
@@ -84,9 +84,9 @@ func main() {
 					continue
 				}
 				if autoDetect {
-					options.Algorithm = algoFromLength(len(strings.Split(line, " ")[0]))
+					options.Algorithm = shaAlgoFromLength(len(strings.Split(line, " ")[0]))
 				}
-				hashLength := lengthAlgo(options.Algorithm)
+				hashLength := shaLengthAlgo(options.Algorithm)
 				hash := line[:hashLength]
 				if len(line) < hashLength+3 || !strings.Contains(line, " ") || len(strings.Split(line, " ")[0]) != hashLength {
 					if options.Warn && !options.Status {
@@ -111,7 +111,7 @@ func main() {
 					fmt.Printf("Unknown error reading file! %s", err)
 					os.Exit(1)
 				}
-				calculated, err := getHash(options.Algorithm, hashFile)
+				calculated, err := shaGetHash(options.Algorithm, hashFile)
 				if err != nil {
 					fmt.Printf("Unknown error calculating hash.")
 					os.Exit(1)
@@ -148,7 +148,7 @@ func main() {
 		for i := 0; i < len(args); i++ {
 			file, err := os.ReadFile(args[i])
 			if options.BitsMode {
-				file = readBitsMode(file)
+				file = shaReadBitsMode(file)
 			}
 			if options.Universal {
 				file = bytes.Replace(file, []byte{'\r', '\n'}, []byte{'\n'}, -1)
@@ -159,12 +159,12 @@ func main() {
 				continue
 			}
 
-			fmt.Printf("%s%s", formatHash(options.Algorithm, file, options.Tag, args[i], mode), "\n")
+			fmt.Printf("%s%s", shaFormatHash(options.Algorithm, file, options.Tag, args[i], mode), "\n")
 		}
 	}
 
 }
-func readBitsMode(data []byte) []byte {
+func shaReadBitsMode(data []byte) []byte {
 	var length = 0
 	for _, b := range data {
 		if b != '1' && b != '0' {
@@ -201,7 +201,7 @@ func readBitsMode(data []byte) []byte {
 	}
 	return outBytes
 }
-func lengthAlgo(algorithm int) int {
+func shaLengthAlgo(algorithm int) int {
 	switch algorithm {
 	case 1:
 		return 40
@@ -222,7 +222,7 @@ func lengthAlgo(algorithm int) int {
 
 	}
 }
-func algoFromLength(length int) int {
+func shaAlgoFromLength(length int) int {
 	switch length {
 	case 40:
 		return 1
@@ -238,7 +238,7 @@ func algoFromLength(length int) int {
 		return -1
 	}
 }
-func checkAlgo(algorithm int) bool {
+func shaCheckAlgo(algorithm int) bool {
 	switch algorithm {
 	case 1:
 		return true
@@ -259,7 +259,7 @@ func checkAlgo(algorithm int) bool {
 
 	}
 }
-func algoString(algorithm int) string {
+func shaAlgoString(algorithm int) string {
 	switch algorithm {
 	case 1:
 		return "SHA1"
@@ -280,7 +280,7 @@ func algoString(algorithm int) string {
 
 	}
 }
-func getHash(algorithm int, data []byte) (string, error) {
+func shaGetHash(algorithm int, data []byte) (string, error) {
 	switch algorithm {
 	case 1:
 		return fmt.Sprintf("%x", sha1.Sum(data)), nil
@@ -301,8 +301,8 @@ func getHash(algorithm int, data []byte) (string, error) {
 
 	}
 }
-func formatHash(algorithm int, data []byte, tag bool, fileName string, mode int) string {
-	hash, err := getHash(algorithm, data)
+func shaFormatHash(algorithm int, data []byte, tag bool, fileName string, mode int) string {
+	hash, err := shaGetHash(algorithm, data)
 	indicator := " "
 	if mode == 1 {
 		indicator = "*"
@@ -315,7 +315,7 @@ func formatHash(algorithm int, data []byte, tag bool, fileName string, mode int)
 		os.Exit(1)
 	}
 	if tag {
-		return fmt.Sprintf("%s (%s) = %s", algoString(algorithm), fileName, hash)
+		return fmt.Sprintf("%s (%s) = %s", shaAlgoString(algorithm), fileName, hash)
 	} else {
 		return fmt.Sprintf("%s %s%s", hash, indicator, fileName)
 	}
