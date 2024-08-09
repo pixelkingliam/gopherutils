@@ -187,11 +187,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `b2sum`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `base32`
 
   ❌ Basic functionality
