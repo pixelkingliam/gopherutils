@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"gopherutils/shared/convert"
+	"gopherutils/shared/hashing"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -28,7 +28,6 @@ func main() {
 		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                                                                            // GNU Compatible
 		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`                                                                   // GNU Compatible
 	}
-	autoDetect := true
 	options.Text = true
 	options.Algorithm = -1
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -43,11 +42,6 @@ func main() {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-	}
-	if options.Algorithm != -1 {
-		autoDetect = false
-	} else {
-		options.Algorithm = 1
 	}
 	if !shaCheckAlgo(options.Algorithm) {
 		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
@@ -68,6 +62,7 @@ func main() {
 			fmt.Printf("--tag option is incompatible with --check.\n")
 			return
 		}
+		sums := make([]hashing.Sum, 0)
 		for _, file := range args {
 			data, err := os.ReadFile(file)
 			if err != nil {
@@ -79,55 +74,28 @@ func main() {
 				fmt.Printf("Unknown error! %s", err)
 				os.Exit(1)
 			}
-			lines := strings.Split(string(data), "\n")
-			for atLine, line := range lines {
-				if line == "" {
-					continue
+			readSums, malFormattedLines := hashing.ReadSums(string(data), "sha")
+			malFormatted += malFormattedLines
+			sums = append(sums, readSums...)
+		}
+		for _, sum := range sums {
+			verifySum, err := hashing.VerifySum(sum)
+			if err != nil {
+				if err.Error() == "File does not exist" {
+					notExist++
 				}
-				if autoDetect {
-					options.Algorithm = shaAlgoFromLength(len(strings.Split(line, " ")[0]))
-				}
-				hashLength := shaLengthAlgo(options.Algorithm)
-				hash := line[:hashLength]
-				if len(line) < hashLength+3 || !strings.Contains(line, " ") || len(strings.Split(line, " ")[0]) != hashLength {
-					if options.Warn && !options.Status {
-						fmt.Printf("Line %v is improperly formatted.\n", atLine+1)
-					}
-					malFormatted++
-					continue
-				}
-				hashFilePath := line[hashLength+2:]
-				_, err = os.Stat(hashFilePath)
-				if err != nil {
-
-					if !options.IgnoreMissing {
-						fmt.Printf("%s: FAILED open or read\n", hashFilePath)
-						notExist++
-					}
-					continue
-
-				}
-				hashFile, err := os.ReadFile(hashFilePath)
-				if err != nil {
-					fmt.Printf("Unknown error reading file! %s", err)
-					os.Exit(1)
-				}
-				calculated, err := shaGetHash(options.Algorithm, hashFile)
-				if err != nil {
-					fmt.Printf("Unknown error calculating hash.")
-					os.Exit(1)
-				}
-				if hash == calculated {
-					if !options.Status && !options.Quiet {
-						fmt.Printf("%s: OK\n", hashFilePath)
-					}
+			}
+			if verifySum {
+				if !options.Status && !options.Quiet {
+					fmt.Printf("%s: OK\n", sum.File)
 				} else {
 					failed++
 					if !options.Status {
-						fmt.Printf("%s: FAILED\n", hashFilePath)
+						fmt.Printf("%s: FAILED\n", sum.File)
 					}
 				}
 			}
+
 		}
 		exit := 0
 		if failed != 0 && !options.Status {
@@ -164,43 +132,6 @@ func main() {
 		}
 	}
 
-}
-func shaLengthAlgo(algorithm int) int {
-	switch algorithm {
-	case 1:
-		return 40
-	case 224:
-		return 56
-	case 256:
-		return 64
-	case 384:
-		return 96
-	case 512:
-		return 128
-	case 512224:
-		return 56
-	case 512256:
-		return 64
-	default:
-		return -1
-
-	}
-}
-func shaAlgoFromLength(length int) int {
-	switch length {
-	case 40:
-		return 1
-	case 56:
-		return 224 // or 512224
-	case 64:
-		return 256 // or 512256
-	case 96:
-		return 384
-	case 128:
-		return 512
-	default:
-		return -1
-	}
 }
 func shaCheckAlgo(algorithm int) bool {
 	switch algorithm {
