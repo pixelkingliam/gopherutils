@@ -173,8 +173,6 @@ func ReadAsciiBits(data []byte) []byte {
 	if iBit != 0 {
 		outBytes[iByte] = tByte
 	}
-	for _, b := range outBytes {
-		fmt.Printf("%08b\n", b)
-	}
+
 	return outBytes
 }
