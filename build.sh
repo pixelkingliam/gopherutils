@@ -4,6 +4,18 @@
 HASH_DIR="/tmp/go_build_hashes"
 mkdir -p "$HASH_DIR"
 
+# Flag for force rebuild
+FORCE_REBUILD=false
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -f|--force) FORCE_REBUILD=true ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
 # Function to calculate MD5 hash of a file
 calculate_md5() {
     ./bin/md5sum "$1" | awk '{ print $1 }'
@@ -18,7 +30,7 @@ for file in source/*.go; do
     current_hash=$(calculate_md5 "$file")
 
     # Check if hash file exists
-    if [ -f "$hash_file" ]; then
+    if [ -f "$hash_file" ] && [ "$FORCE_REBUILD" = false ]; then
         # Read stored hash
         stored_hash=$(cat "$hash_file")
 

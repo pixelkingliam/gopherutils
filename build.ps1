@@ -4,6 +4,15 @@ if (-not (Test-Path $hashDir)) {
     New-Item -Path $hashDir -ItemType Directory | Out-Null
 }
 
+# Flag for force rebuild
+$forceRebuild = $false
+
+# Parse command-line arguments
+param (
+[switch]$Force
+)
+$forceRebuild = $Force
+
 # Function to calculate MD5 hash of a file
 function Calculate-MD5 {
     param (
@@ -29,7 +38,7 @@ foreach ($file in $sourceFiles) {
     $currentHash = Calculate-MD5 -filePath $file.FullName
 
     # Check if hash file exists
-    if (Test-Path $hashFile) {
+    if (-not $forceRebuild -and (Test-Path $hashFile)) {
         # Read stored hash
         $storedHash = Get-Content -Path $hashFile
 
