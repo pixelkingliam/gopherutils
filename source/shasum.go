@@ -1,15 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"gopherutils/shared/convert"
 	"gopherutils/shared/hashing"
+	"io"
 	"os"
 )
 
@@ -28,8 +24,7 @@ func main() {
 		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                                                                            // GNU Compatible
 		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`                                                                   // GNU Compatible
 	}
-	options.Text = true
-	options.Algorithm = -1
+	options.Algorithm = 1
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
 		args = args[1:]
@@ -43,16 +38,42 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	readStdIn := false
+	if len(args) == 0 {
+		readStdIn = true
+	}
+	if args[0] == "-" {
+		readStdIn = true
+	}
+	if readStdIn {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Printf("Error reading stdin: %s\n", err.Error())
+			os.Exit(1)
+		}
+		var sum hashing.Sum
+		if options.BitsMode {
+			sum.Mode |= hashing.BitMode
+		}
+		if options.Universal {
+			sum.Mode |= hashing.Universal
+		}
+		if options.Tag {
+			sum.Mode |= hashing.Tag
+		}
+		if options.Binary {
+			sum.Mode |= hashing.Binary
+		}
+
+		sum.HashType = shaAlgoString(options.Algorithm)
+		sum.File = "-"
+		sum.Hash = hashing.Hash(data[:], sum.HashType)
+		fmt.Println(sum)
+		os.Exit(0)
+	}
 	if !shaCheckAlgo(options.Algorithm) {
 		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
 		os.Exit(1)
-	}
-	mode := 0
-	if options.Binary {
-		mode = 1
-	}
-	if options.BitsMode {
-		mode = 2
 	}
 	if options.Check {
 		failed := 0
@@ -81,18 +102,21 @@ func main() {
 		for _, sum := range sums {
 			verifySum, err := hashing.VerifySum(sum)
 			if err != nil {
-				if err.Error() == "File does not exist" {
+				if err.Error() == "file does not exist" {
 					notExist++
+				} else if err.Error() == "invalid sum algorithm" {
+					fmt.Println("Internal error")
+					os.Exit(1)
 				}
 			}
 			if verifySum {
 				if !options.Status && !options.Quiet {
 					fmt.Printf("%s: OK\n", sum.File)
-				} else {
-					failed++
-					if !options.Status {
-						fmt.Printf("%s: FAILED\n", sum.File)
-					}
+				}
+			} else {
+				failed++
+				if !options.Status {
+					fmt.Printf("%s: FAILED\n", sum.File)
 				}
 			}
 
@@ -115,20 +139,26 @@ func main() {
 		os.Exit(exit)
 	} else {
 		for i := 0; i < len(args); i++ {
-			file, err := os.ReadFile(args[i])
+			var template hashing.SumTemplate
 			if options.BitsMode {
-				file = convert.ReadAsciiBits(file)
+				template.Mode |= hashing.BitMode
+				fmt.Printf("wtf2")
+
 			}
 			if options.Universal {
-				file = bytes.Replace(file, []byte{'\r', '\n'}, []byte{'\n'}, -1)
-				file = bytes.Replace(file, []byte{'\r'}, []byte{'\n'}, -1)
-			}
-			if err != nil {
-				fmt.Println("Error reading file:", err)
-				continue
-			}
+				template.Mode |= hashing.Universal
 
-			fmt.Printf("%s%s", shaFormatHash(options.Algorithm, file, options.Tag, args[i], mode), "\n")
+			}
+			if options.Tag {
+				template.Mode |= hashing.Tag
+			}
+			if options.Binary {
+				template.Mode |= hashing.Binary
+			}
+			template.HashType = shaAlgoString(options.Algorithm)
+			template.File = args[i]
+			sum := hashing.GetSum(template)
+			fmt.Println(sum)
 		}
 	}
 
@@ -173,45 +203,5 @@ func shaAlgoString(algorithm int) string {
 	default:
 		return "UNKNOWN"
 
-	}
-}
-func shaGetHash(algorithm int, data []byte) (string, error) {
-	switch algorithm {
-	case 1:
-		return fmt.Sprintf("%x", sha1.Sum(data)), nil
-	case 224:
-		return fmt.Sprintf("%x", sha256.Sum224(data)), nil
-	case 256:
-		return fmt.Sprintf("%x", sha256.Sum256(data)), nil
-	case 384:
-		return fmt.Sprintf("%x", sha512.Sum384(data)), nil
-	case 512:
-		return fmt.Sprintf("%x", sha512.Sum512(data)), nil
-	case 512224:
-		return fmt.Sprintf("%x", sha512.Sum512_224(data)), nil
-	case 512256:
-		return fmt.Sprintf("%x", sha512.Sum512_256(data)), nil
-	default:
-		return "", errors.New("invalid SHA algorithm")
-
-	}
-}
-func shaFormatHash(algorithm int, data []byte, tag bool, fileName string, mode int) string {
-	hash, err := shaGetHash(algorithm, data)
-	indicator := " "
-	if mode == 1 {
-		indicator = "*"
-	}
-	if mode == 2 {
-		indicator = "^"
-	}
-	if err != nil {
-		fmt.Printf("Error getting hash for %s: %s\n", fileName, err)
-		os.Exit(1)
-	}
-	if tag {
-		return fmt.Sprintf("%s (%s) = %s", shaAlgoString(algorithm), fileName, hash)
-	} else {
-		return fmt.Sprintf("%s %s%s", hash, indicator, fileName)
 	}
 }

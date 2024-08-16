@@ -1,6 +1,7 @@
 package hashing
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -18,8 +19,31 @@ type Sum struct {
 	HashType string
 }
 
+func (receiver Sum) String() string {
+	indicator := " "
+
+	if receiver.Mode&Binary != 0 {
+		indicator = "*"
+	} else if receiver.Mode&BitMode != 0 {
+		indicator = "^"
+	} else if receiver.Mode&Universal != 0 {
+		indicator = "U"
+	}
+
+	if receiver.Mode&Tag == 1 {
+		return fmt.Sprintf("%s (%s) = %x", receiver.HashType, receiver.File, receiver.Hash)
+	} else {
+		return fmt.Sprintf("%x %s%s", receiver.Hash, indicator, receiver.File)
+	}
+}
+
+type SumTemplate struct {
+	File     string
+	Mode     uint8
+	HashType string
+}
+
 func ReadSums(str string, algo string) ([]Sum, int) {
-	fmt.Println("ok")
 	sums := make([]Sum, 0)
 	malformed := 0
 	lines := strings.Split(str, "\n")
@@ -43,28 +67,79 @@ func ReadSums(str string, algo string) ([]Sum, int) {
 		}
 		switch line[len(sum.Hash)+1] {
 		case '^':
-			sum.Mode = 1
+			sum.Mode |= BitMode
 			break
 		default:
-			sum.Mode = 0
 			break
 		}
 		sums = append(sums, sum)
 	}
 	return sums, malformed
 }
+func GetSum(template SumTemplate) Sum {
+	data, err := os.ReadFile(template.File)
+	if err != nil {
+		fmt.Printf("Error reading file %v: %v\n", template.File, err)
+	}
+	if template.Mode&BitMode == 1 && template.Mode&Universal == 1 {
+		fmt.Printf("Ambiguous file mode, ignoring --UNIVERSAL")
+	}
+	if template.Mode&BitMode == 1 {
+		data = convert.ReadAsciiBits(data)
+	} else if template.Mode&Universal == 1 {
+		data = bytes.Replace(data, []byte{'\r', '\n'}, []byte{'\n'}, -1)
+		data = bytes.Replace(data, []byte{'\r'}, []byte{'\n'}, -1)
+	}
+	var sum Sum
+	sum.File = template.File
+	sum.Mode = template.Mode
+	sum.HashType = template.HashType
+	sum.Hash = Hash(data, sum.HashType)
+	return sum
+}
+func Hash(data []byte, algorithm string) []byte {
+	switch algorithm {
+	case "SHA1":
+		hash := sha1.Sum(data)
+		return hash[:]
+	case "SHA224":
+		hash := sha256.Sum224(data)
+		return hash[:]
+	case "SHA256":
+		hash := sha256.Sum256(data)
+		return hash[:]
+	case "SHA384":
+		hash := sha512.Sum384(data)
+		return hash[:]
+	case "SHA512":
+		hash := sha512.Sum512(data)
+		return hash[:]
+	case "SHA512/224":
+		hash := sha512.Sum512_224(data)
+		return hash[:]
+	case "SHA512/256":
+		hash := sha512.Sum512_256(data)
+		return hash[:]
+	default:
+		return []byte("err")
+	}
+}
 func VerifySum(sum Sum) (bool, error) {
 	_, err := os.Stat(sum.File)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("File does not exist"))
+		return false, errors.New("file does not exist")
 	}
 	data, err := os.ReadFile(sum.File)
 	if err != nil {
 		fmt.Printf("Failed to read")
 		os.Exit(1)
 	}
-	if sum.Mode == 1 {
+	if sum.Mode&Universal == 1 {
 		data = convert.ReadAsciiBits(data)
+	}
+	if sum.Mode&Universal == 1 {
+		data = bytes.Replace(data, []byte{'\r', '\n'}, []byte{'\n'}, -1)
+		data = bytes.Replace(data, []byte{'\r'}, []byte{'\n'}, -1)
 	}
 	switch sum.HashType {
 	case "SHA1":
