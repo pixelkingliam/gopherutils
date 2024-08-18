@@ -142,7 +142,6 @@ func main() {
 			var template hashing.SumTemplate
 			if options.BitsMode {
 				template.Mode |= hashing.BitMode
-				fmt.Printf("wtf2")
 
 			}
 			if options.Universal {
