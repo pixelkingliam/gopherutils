@@ -38,6 +38,10 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	if !shaCheckAlgo(options.Algorithm) {
+		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
+		os.Exit(1)
+	}
 	readStdIn := false
 	if len(args) == 0 {
 		readStdIn = true
@@ -71,10 +75,7 @@ func main() {
 		fmt.Println(sum)
 		os.Exit(0)
 	}
-	if !shaCheckAlgo(options.Algorithm) {
-		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
-		os.Exit(1)
-	}
+
 	if options.Check {
 		failed := 0
 		malFormatted := 0
