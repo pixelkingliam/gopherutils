@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"golang.org/x/crypto/blake2b"
-	"gopherutils/shared/convert"
+	"gopherutils/shared/hashing"
+	"io"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -46,13 +44,40 @@ func main() {
 		fmt.Println("Invalid BLAKE2b length\nTry 'b2sum -h' for help.")
 		os.Exit(1)
 	}
-	mode := 0
-	if options.Binary {
-		mode = 1
+	readStdIn := false
+	if len(args) == 0 {
+		readStdIn = true
 	}
-	if options.BitsMode {
-		mode = 2
+	if args[0] == "-" {
+		readStdIn = true
 	}
+	if readStdIn {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Printf("Error reading stdin: %s\n", err.Error())
+			os.Exit(1)
+		}
+		var sum hashing.Sum
+		if options.BitsMode {
+			sum.Mode |= hashing.BitMode
+		}
+		if options.Universal {
+			sum.Mode |= hashing.Universal
+		}
+		if options.Tag {
+			sum.Mode |= hashing.Tag
+		}
+		if options.Binary {
+			sum.Mode |= hashing.Binary
+		}
+
+		sum.HashType = b2AlgoString(options.Length)
+		sum.File = "-"
+		sum.Hash = hashing.Hash(data[:], sum.HashType)
+		fmt.Println(sum)
+		os.Exit(0)
+	}
+
 	if options.Check {
 		failed := 0
 		malFormatted := 0
@@ -61,6 +86,7 @@ func main() {
 			fmt.Printf("--tag option is incompatible with --check.\n")
 			return
 		}
+		sums := make([]hashing.Sum, 0)
 		for _, file := range args {
 			data, err := os.ReadFile(file)
 			if err != nil {
@@ -72,53 +98,31 @@ func main() {
 				fmt.Printf("Unknown error! %s", err)
 				os.Exit(1)
 			}
-			lines := strings.Split(string(data), "\n")
-			for atLine, line := range lines {
-				if line == "" {
-					continue
-				}
-				options.Length = b2AlgoFromLength(len(strings.Split(line, " ")[0]))
-				hashLength := b2LengthAlgo(options.Length)
-				hash := line[:hashLength]
-				if len(line) < hashLength+3 || !strings.Contains(line, " ") || len(strings.Split(line, " ")[0]) != hashLength {
-					if options.Warn && !options.Status {
-						fmt.Printf("Line %v is improperly formatted.\n", atLine+1)
-					}
-					malFormatted++
-					continue
-				}
-				hashFilePath := line[hashLength+2:]
-				_, err = os.Stat(hashFilePath)
-				if err != nil {
-
-					if !options.IgnoreMissing {
-						fmt.Printf("%s: FAILED open or read\n", hashFilePath)
-						notExist++
-					}
-					continue
-
-				}
-				hashFile, err := os.ReadFile(hashFilePath)
-				if err != nil {
-					fmt.Printf("Unknown error reading file! %s", err)
+			readSums, malFormattedLines := hashing.ReadSums(string(data), "b2")
+			malFormatted += malFormattedLines
+			sums = append(sums, readSums...)
+		}
+		for _, sum := range sums {
+			verifySum, err := hashing.VerifySum(sum)
+			if err != nil {
+				if err.Error() == "file does not exist" {
+					notExist++
+				} else if err.Error() == "invalid sum algorithm" {
+					fmt.Println("Internal error")
 					os.Exit(1)
-				}
-				calculated, err := b2GetHash(options.Length, hashFile)
-				if err != nil {
-					fmt.Printf("Unknown error calculating hash.")
-					os.Exit(1)
-				}
-				if hash == calculated {
-					if !options.Status && !options.Quiet {
-						fmt.Printf("%s: OK\n", hashFilePath)
-					}
-				} else {
-					failed++
-					if !options.Status {
-						fmt.Printf("%s: FAILED\n", hashFilePath)
-					}
 				}
 			}
+			if verifySum {
+				if !options.Status && !options.Quiet {
+					fmt.Printf("%s: OK\n", sum.File)
+				}
+			} else {
+				failed++
+				if !options.Status {
+					fmt.Printf("%s: FAILED\n", sum.File)
+				}
+			}
+
 		}
 		exit := 0
 		if failed != 0 && !options.Status {
@@ -138,58 +142,33 @@ func main() {
 		os.Exit(exit)
 	} else {
 		for i := 0; i < len(args); i++ {
-			file, err := os.ReadFile(args[i])
+			var template hashing.SumTemplate
 			if options.BitsMode {
-				file = convert.ReadAsciiBits(file)
+				template.Mode |= hashing.BitMode
+
 			}
 			if options.Universal {
-				file = bytes.Replace(file, []byte{'\r', '\n'}, []byte{'\n'}, -1)
-				file = bytes.Replace(file, []byte{'\r'}, []byte{'\n'}, -1)
-			}
-			if err != nil {
-				fmt.Println("Error reading file:", err)
-				continue
-			}
+				template.Mode |= hashing.Universal
 
-			fmt.Printf("%s%s", b2FormatHash(options.Length, file, options.Tag, args[i], mode), "\n")
+			}
+			if options.Tag {
+				template.Mode |= hashing.Tag
+			}
+			if options.Binary {
+				template.Mode |= hashing.Binary
+			}
+			template.HashType = b2AlgoString(options.Length)
+			template.File = args[i]
+			sum := hashing.GetSum(template)
+			fmt.Println(sum)
 		}
 	}
 
 }
-func b2AlgoFromLength(length int) int {
-	return length * 4
-}
+
 func b2CheckAlgo(algorithm int) bool {
 	return algorithm%8 == 0
 }
-func b2LengthAlgo(algorithm int) int {
-	return algorithm / 4
-}
-
 func b2AlgoString(algorithm int) string {
 	return fmt.Sprintf("BLAKE2b-%d", algorithm)
-}
-func b2GetHash(algorithm int, data []byte) (string, error) {
-	hash, err := blake2b.New(algorithm/8, nil)
-	if err != nil {
-		return "", err
-	}
-	hash.Write(data)
-	return fmt.Sprintf("%x", hash.Sum(nil)), nil
-}
-func b2FormatHash(algorithm int, data []byte, tag bool, fileName string, mode int) string {
-	hash, err := b2GetHash(algorithm, data)
-	indicator := " "
-	if mode == 1 {
-		indicator = "*"
-	}
-	if err != nil {
-		fmt.Printf("Error getting hash for %s: %s\n", fileName, err)
-		os.Exit(1)
-	}
-	if tag {
-		return fmt.Sprintf("%s (%s) = %s", b2AlgoString(algorithm), fileName, hash)
-	} else {
-		return fmt.Sprintf("%s %s%s", hash, indicator, fileName)
-	}
 }

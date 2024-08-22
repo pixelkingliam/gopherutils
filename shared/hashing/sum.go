@@ -7,8 +7,10 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/blake2b"
 	"gopherutils/shared/convert"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -64,6 +66,8 @@ func ReadSums(str string, algo string) ([]Sum, int) {
 		switch algo {
 		case "sha":
 			sum.HashType = shaAlgoString(shaAlgoFromLength(len(sum.Hash)))
+		case "b2":
+			sum.HashType = b2AlgoString(b2AlgoFromLength(len(sum.Hash)))
 		}
 		switch line[len(sum.Hash)+1] {
 		case '^':
@@ -98,6 +102,13 @@ func GetSum(template SumTemplate) Sum {
 	return sum
 }
 func Hash(data []byte, algorithm string) []byte {
+	if strings.Contains(algorithm, "BLAKE2b-") {
+		length, _ := strconv.ParseInt(algorithm[8:], 10, 32)
+		hash, _ := blake2b.New(int(length)/8, nil)
+
+		hash.Write(data)
+		return hash.Sum(nil)
+	}
 	switch algorithm {
 	case "SHA1":
 		hash := sha1.Sum(data)
@@ -141,21 +152,26 @@ func VerifySum(sum Sum) (bool, error) {
 		data = bytes.Replace(data, []byte{'\r', '\n'}, []byte{'\n'}, -1)
 		data = bytes.Replace(data, []byte{'\r'}, []byte{'\n'}, -1)
 	}
+	if strings.Contains(sum.HashType, "BLAKE2b-") {
+
+		processed := Hash(data, sum.HashType)
+		return fmt.Sprintf("%x", processed) == fmt.Sprintf("%s", sum.Hash), nil
+	}
 	switch sum.HashType {
 	case "SHA1":
-		return fmt.Sprintf("%x", sha1.Sum(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha1.Sum(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	case "SHA224":
-		return fmt.Sprintf("%x", sha256.Sum224(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha256.Sum224(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	case "SHA256":
-		return fmt.Sprintf("%x", sha256.Sum256(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha256.Sum256(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	case "SHA384":
-		return fmt.Sprintf("%x", sha512.Sum384(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha512.Sum384(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	case "SHA512":
-		return fmt.Sprintf("%x", sha512.Sum512(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha512.Sum512(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	case "SHA512/224":
-		return fmt.Sprintf("%x", sha512.Sum512_224(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha512.Sum512_224(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	case "SHA512/256":
-		return fmt.Sprintf("%x", sha512.Sum512_256(data)) == fmt.Sprintf("%x", sum.Hash), nil
+		return fmt.Sprintf("%x", sha512.Sum512_256(data)) == fmt.Sprintf("%s", sum.Hash), nil
 	default:
 		return false, errors.New("invalid sum algorithm")
 
@@ -197,4 +213,10 @@ func shaAlgoString(algorithm int) string {
 		return "UNKNOWN"
 
 	}
+}
+func b2AlgoFromLength(length int) int {
+	return length * 4
+}
+func b2AlgoString(algorithm int) string {
+	return fmt.Sprintf("BLAKE2b-%d", algorithm)
 }
