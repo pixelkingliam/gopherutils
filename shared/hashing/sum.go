@@ -2,6 +2,7 @@ package hashing
 
 import (
 	"bytes"
+	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -68,7 +69,10 @@ func ReadSums(str string, algo string) ([]Sum, int) {
 			sum.HashType = shaAlgoString(shaAlgoFromLength(len(sum.Hash)))
 		case "b2":
 			sum.HashType = b2AlgoString(b2AlgoFromLength(len(sum.Hash)))
+		case "md5":
+			sum.HashType = "MD5"
 		}
+
 		switch line[len(sum.Hash)+1] {
 		case '^':
 			sum.Mode |= BitMode
@@ -110,6 +114,9 @@ func Hash(data []byte, algorithm string) []byte {
 		return hash.Sum(nil)
 	}
 	switch algorithm {
+	case "MD5":
+		hash := md5.Sum(data)
+		return hash[:]
 	case "SHA1":
 		hash := sha1.Sum(data)
 		return hash[:]
@@ -132,7 +139,7 @@ func Hash(data []byte, algorithm string) []byte {
 		hash := sha512.Sum512_256(data)
 		return hash[:]
 	default:
-		return []byte("err")
+		return []byte{0xDE, 0xAD, 0xBE, 0xEF}
 	}
 }
 func VerifySum(sum Sum) (bool, error) {

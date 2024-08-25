@@ -1,26 +1,28 @@
 package main
 
 import (
-	"crypto/md5"
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"gopherutils/shared/hashing"
+	"io"
 	"os"
-	"strings"
 )
 
 func main() {
 	var options struct {
-		Zero          bool `short:"z" long:"zero" description:"Ends each output with a NUL character instead of a newline character."` // GNU Compatible
-		Binary        bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                  // GNU Compatible
-		Text          bool `short:"t" long:"text" description:"Reads in text mode."`                                                   // GNU Compatible
-		Tag           bool `long:"tag" description:"Writes BSD-style checksums."`                                                      // GNU Compatible
-		Check         bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                        // GNU Compatible
-		Warn          bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                          // GNU Compatible
-		Status        bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                  // GNU Compatible
-		Quiet         bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`          // GNU Compatible
-		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                       // GNU Compatible
-		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`              // GNU Compatible
+		Zero          bool `short:"z" long:"zero" description:"Ends each output with a NUL character instead of a newline character."`                                                      // GNU Compatible
+		Binary        bool `short:"b" long:"binary" description:"Reads in binary mode, does nothing on GNU systems."`                                                                       // GNU Compatible
+		Text          bool `short:"t" long:"text" description:"Reads in text mode."`                                                                                                        // GNU Compatible
+		Tag           bool `long:"tag" description:"Writes BSD-style checksums."`                                                                                                           // GNU Compatible
+		BitsMode      bool `short:"0" long:"01" description:"Reads in BITS mode.\nASCII '0' is interpreted as 0-bit\nASCII '1' is interpreted as 1-bit\nAll other characters are ignored."` // GNU Compatible
+		Universal     bool `short:"U" long:"UNIVERSAL" description:"Reads in Universal newlines mode.\n\tNormalizes different newline formats to LF ('\n')"`                                // GNU Compatible
+		Check         bool `short:"c" long:"check" description:"Reads checksums from FILEs and verifies them."`                                                                             // GNU Compatible
+		Warn          bool `short:"w" long:"warn" description:"Writes a warning for each mal-formated line."`                                                                               // GNU Compatible
+		Status        bool `short:"s" long:"status" description:"Avoids printing, rely on exit status code instead."`                                                                       // GNU Compatible
+		Quiet         bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`                                                               // GNU Compatible
+		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                                                                            // GNU Compatible
+		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`                                                                   // GNU Compatible
 	}
 	options.Text = true
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -32,42 +34,45 @@ func main() {
 		if errors.Is(err, flags.ErrHelp) {
 			os.Exit(0)
 		} else {
+			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
 	}
-	ending := "\n"
-	if options.Zero {
-		ending = "\x00"
+
+	readStdIn := false
+	if len(args) == 0 {
+		readStdIn = true
 	}
-	if options.Binary {
-		options.Text = false
+	if args[0] == "-" {
+		readStdIn = true
 	}
-	prefix := " "
-	if !options.Text {
-		prefix = "*"
+	if readStdIn {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Printf("Error reading stdin: %s\n", err.Error())
+			os.Exit(1)
+		}
+		var sum hashing.Sum
+		if options.BitsMode {
+			sum.Mode |= hashing.BitMode
+		}
+		if options.Universal {
+			sum.Mode |= hashing.Universal
+		}
+		if options.Tag {
+			sum.Mode |= hashing.Tag
+		}
+		if options.Binary {
+			sum.Mode |= hashing.Binary
+		}
+
+		sum.HashType = "MD5"
+		sum.File = "-"
+		sum.Hash = hashing.Hash(data[:], sum.HashType)
+		fmt.Println(sum)
+		os.Exit(0)
 	}
-	if !options.Check {
-		if options.Warn {
-			fmt.Printf("The --warn/-w option depends on --check.\n see --help for more information.\n")
-			os.Exit(1)
-		}
-		if options.Status {
-			fmt.Printf("The --status/-s option depends on --check.\n see --help for more information.\n")
-			os.Exit(1)
-		}
-		if options.Quiet {
-			fmt.Printf("The --quiet/-q option depends on --check.\n see --help for more information.\n")
-			os.Exit(1)
-		}
-		if options.IgnoreMissing {
-			fmt.Printf("The --ignore-missing/-i option depends on --check.\n see --help for more information.\n")
-			os.Exit(1)
-		}
-		if options.Strict {
-			fmt.Printf("The --strict/-S option depends on --check.\n see --help for more information.\n")
-			os.Exit(1)
-		}
-	}
+
 	if options.Check {
 		failed := 0
 		malFormatted := 0
@@ -76,6 +81,7 @@ func main() {
 			fmt.Printf("--tag option is incompatible with --check.\n")
 			return
 		}
+		sums := make([]hashing.Sum, 0)
 		for _, file := range args {
 			data, err := os.ReadFile(file)
 			if err != nil {
@@ -87,47 +93,31 @@ func main() {
 				fmt.Printf("Unknown error! %s", err)
 				os.Exit(1)
 			}
-			lines := strings.Split(string(data), "\n")
-			for atLine, line := range lines {
-				if line == "" {
-					continue
-				}
-				hash := line[:32]
-				if len(line) < 35 || !strings.Contains(line, " ") || len(strings.Split(line, " ")[0]) != 32 {
-					if options.Warn && !options.Status {
-						fmt.Printf("Line %v is improperly formatted.\n", atLine+1)
-					}
-					malFormatted++
-					continue
-				}
-				hashFilePath := line[34:]
-
-				_, err = os.Stat(hashFilePath)
-				if err != nil {
-
-					if !options.IgnoreMissing {
-						fmt.Printf("%s: FAILED open or read\n", hashFilePath)
-						notExist++
-					}
-					continue
-
-				}
-				hashFile, err := os.ReadFile(hashFilePath)
-				if err != nil {
-					fmt.Printf("Unknown error reading file! %s", err)
+			readSums, malFormattedLines := hashing.ReadSums(string(data), "md5")
+			malFormatted += malFormattedLines
+			sums = append(sums, readSums...)
+		}
+		for _, sum := range sums {
+			verifySum, err := hashing.VerifySum(sum)
+			if err != nil {
+				if err.Error() == "file does not exist" {
+					notExist++
+				} else if err.Error() == "invalid sum algorithm" {
+					fmt.Println("Internal error")
 					os.Exit(1)
 				}
-				if hash == fmt.Sprintf("%x", md5.Sum(hashFile)) {
-					if !options.Status && !options.Quiet {
-						fmt.Printf("%s: OK\n", hashFilePath)
-					}
-				} else {
-					failed++
-					if !options.Status {
-						fmt.Printf("%s: FAILED\n", hashFilePath)
-					}
+			}
+			if verifySum {
+				if !options.Status && !options.Quiet {
+					fmt.Printf("%s: OK\n", sum.File)
+				}
+			} else {
+				failed++
+				if !options.Status {
+					fmt.Printf("%s: FAILED\n", sum.File)
 				}
 			}
+
 		}
 		exit := 0
 		if failed != 0 && !options.Status {
@@ -145,25 +135,27 @@ func main() {
 			exit = 1
 		}
 		os.Exit(exit)
-	}
-	for _, arg := range args {
-		_, err := os.Stat(arg)
-		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				fmt.Printf("File '%s' does not exist.\n", arg)
-			} else {
-				fmt.Println(err.Error())
+	} else {
+		for i := 0; i < len(args); i++ {
+			var template hashing.SumTemplate
+			if options.BitsMode {
+				template.Mode |= hashing.BitMode
+
 			}
-			os.Exit(1)
-		}
-		file, err := os.ReadFile(arg)
-		if err != nil {
-			os.Exit(1)
-		}
-		if options.Tag {
-			fmt.Printf("MD5 (%s) = %x%s", arg, md5.Sum(file), ending)
-		} else {
-			fmt.Printf("%x %s%s%s", md5.Sum(file), prefix, arg, ending)
+			if options.Universal {
+				template.Mode |= hashing.Universal
+
+			}
+			if options.Tag {
+				template.Mode |= hashing.Tag
+			}
+			if options.Binary {
+				template.Mode |= hashing.Binary
+			}
+			template.HashType = "MD5"
+			template.File = args[i]
+			sum := hashing.GetSum(template)
+			fmt.Println(sum)
 		}
 	}
 
