@@ -138,7 +138,7 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `realpath`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 
@@ -397,11 +397,11 @@ See `LICENSE`
   ❌ GNU Compatibility
 * `arch`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
-  ❌ Advanced functionality
+  ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ✔️ GNU Compatibility
 * `basename`
 
   ✔️ Basic functionality
