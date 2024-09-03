@@ -28,12 +28,12 @@ func main() {
 	if options.Zero {
 		terminator = "\x00"
 	}
-	for _, fakepath := range args {
+	for _, fakePath := range args {
 		pwd, err := os.Getwd()
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			return
 		}
-		fmt.Printf("%s/%s%s", pwd, fakepath, terminator)
+		fmt.Printf("%s/%s%s", pwd, fakePath, terminator)
 	}
 }
