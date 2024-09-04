@@ -11,8 +11,9 @@ import (
 func main() {
 
 	var options struct {
-		Zero         bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Incompatible
-		CanonMissing bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Incompatible
+		Zero          bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Incompatible
+		CanonMissing  bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Incompatible
+		CanonExisting bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Incompatible
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -42,11 +43,14 @@ func main() {
 			final = strings.Split(pwd, "/")
 		}
 		for i, str := range strings.Split(fakePath, "/") {
+			if str == "" {
+				continue
+			}
 			if str == ".." || str == "../" {
 				if i == 0 {
 					continue
 				}
-				_, err := os.Stat(formPath(final))
+				_, err := os.Stat(formPath(final, fakePath[len(fakePath)-1] == '/'))
 				if err != nil && !options.CanonMissing {
 					fmt.Printf("Error: %v\n", err)
 					return
@@ -55,13 +59,19 @@ func main() {
 				continue
 			}
 			path := append(final, str)
-			lstat, err := os.Lstat(formPath(final))
+			lstat, err := os.Lstat(formPath(path, fakePath[len(fakePath)-1] == '/'))
 			if err != nil {
+				fmt.Println(path)
+				fmt.Println(final)
+				if options.CanonExisting {
+					fmt.Printf("File or Directory '%s' does not exist!\n", formPath(path, fakePath[len(fakePath)-1] == '/'))
+					return
+				}
 				final = path
 				continue
 			}
 			if lstat.Mode()&os.ModeSymlink != 0 {
-				target, err := os.Readlink(formPath(path))
+				target, err := os.Readlink(formPath(path, fakePath[len(fakePath)-1] == '/'))
 				if err != nil {
 					fmt.Printf("Error getting symlink location: %v\n", err)
 					return
@@ -72,10 +82,10 @@ func main() {
 			}
 		}
 
-		fmt.Printf("%s%s", formPath(final), terminator)
+		fmt.Printf("%s%s", formPath(final, fakePath[len(fakePath)-1] == '/'), terminator)
 	}
 }
-func formPath(components []string) string {
+func formPath(components []string, isDir bool) string {
 	sorted := make([]string, 0)
 	for _, str := range components {
 		if str != "" {
@@ -86,6 +96,9 @@ func formPath(components []string) string {
 	result := "/"
 	for _, component := range components {
 		result += component
+		result += "/"
+	}
+	if isDir {
 		result += "/"
 	}
 	return result[:len(result)-1]
