@@ -11,10 +11,13 @@ import (
 func main() {
 
 	var options struct {
-		Zero          bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Incompatible
-		CanonMissing  bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Incompatible
-		CanonExisting bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Incompatible
+		Zero           bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Incompatible
+		CanonMissing   bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Incompatible
+		CanonExisting  bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Incompatible
+		NoSymlink      bool `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Incompatible
+		NoSymlinkExtra bool `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Incompatible
 	}
+
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
 		args = args[1:]
@@ -27,6 +30,9 @@ func main() {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
+	}
+	if options.NoSymlinkExtra {
+		options.NoSymlink = true
 	}
 	terminator := "\n"
 	if options.Zero {
@@ -70,7 +76,7 @@ func main() {
 				final = path
 				continue
 			}
-			if lstat.Mode()&os.ModeSymlink != 0 {
+			if lstat.Mode()&os.ModeSymlink != 0 && !options.NoSymlink {
 				target, err := os.Readlink(formPath(path, fakePath[len(fakePath)-1] == '/'))
 				if err != nil {
 					fmt.Printf("Error getting symlink location: %v\n", err)
