@@ -11,11 +11,12 @@ import (
 func main() {
 
 	var options struct {
-		Zero           bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Incompatible
-		CanonMissing   bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Incompatible
-		CanonExisting  bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Incompatible
-		NoSymlink      bool `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Incompatible
-		NoSymlinkExtra bool `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Incompatible
+		Zero           bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Compatible
+		CanonMissing   bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Compatible
+		CanonExisting  bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Compatible
+		NoSymlink      bool `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Compatible
+		NoSymlinkExtra bool `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Compatible
+
 	}
 
 	args, err := flags.ParseArgs(&options, os.Args)
