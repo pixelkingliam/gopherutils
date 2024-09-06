@@ -16,9 +16,9 @@ func main() {
 		CanonExisting  bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Compatible
 		NoSymlink      bool `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Compatible
 		NoSymlinkExtra bool `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Compatible
-
+		Physical       bool `short:"P" long:"physical" description:"Resolves symlinks as encountered. (Default)"`                                // GNU Compatible
+		Logical        bool `short:"L" long:"logical" description:"Resolves '..' components before symlinks"`                                    // GNU Compatible
 	}
-
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
 		args = args[1:]
@@ -41,6 +41,7 @@ func main() {
 	}
 	for _, fakePath := range args {
 		final := make([]string, 0)
+		var skipParentComp = false
 		if fakePath[0] != '/' {
 			pwd, err := os.Getwd()
 			if err != nil {
@@ -54,6 +55,10 @@ func main() {
 				continue
 			}
 			if str == ".." || str == "../" {
+				if skipParentComp {
+					skipParentComp = false
+					continue
+				}
 				if i == 0 {
 					continue
 				}
@@ -83,7 +88,15 @@ func main() {
 					fmt.Printf("Error getting symlink location: %v\n", err)
 					return
 				}
-				final = strings.Split(target, "/")
+				if strings.Split(fakePath, "/")[i+1] == ".." && options.Logical {
+					skipParentComp = true
+					continue
+				}
+				if target[0] == '/' {
+					final = strings.Split(target, "/")
+				} else {
+					final = append(final, strings.Split(target, "/")...)
+				}
 			} else {
 				final = path
 			}
