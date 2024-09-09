@@ -13,6 +13,7 @@ import (
 
 func main() {
 	var options struct {
+		//VArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args[1:])
 	if err != nil {
@@ -22,6 +23,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	//VCode
 	total := 0.0
 	for _, arg := range args {
 		modifier := 1

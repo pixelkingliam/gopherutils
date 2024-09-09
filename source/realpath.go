@@ -18,6 +18,7 @@ func main() {
 		NoSymlinkExtra bool `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Compatible
 		Physical       bool `short:"P" long:"physical" description:"Resolves symlinks as encountered. (Default)"`                                // GNU Compatible
 		Logical        bool `short:"L" long:"logical" description:"Resolves '..' components before symlinks"`                                    // GNU Compatible
+		//VArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -32,6 +33,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	//VCode
 	if options.NoSymlinkExtra {
 		options.NoSymlink = true
 	}

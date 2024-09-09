@@ -23,6 +23,7 @@ func main() {
 		Quiet         bool `short:"q" long:"quiet" description:"Avoids printing \"OK\" for each successfully verified file."`                                                               // GNU Compatible
 		IgnoreMissing bool `short:"i" long:"ignore-missing" description:"Ignores missing files instead of fail"`                                                                            // GNU Compatible
 		Strict        bool `short:"S" long:"strict" description:"Exit non-zero for improperly formatted checksum lines."`                                                                   // GNU Compatible
+		//VArg
 	}
 	options.Algorithm = 1
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -38,6 +39,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	//VCode
 	if !shaCheckAlgo(options.Algorithm) {
 		fmt.Println("Invalid SHA algorithm\nTry 'shasum -h' for help.")
 		os.Exit(1)

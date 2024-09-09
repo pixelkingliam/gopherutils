@@ -10,6 +10,7 @@ import (
 func main() {
 	var options struct {
 		Null bool `short:"0" long:"null" description:"Ends each output line with NUL instead of a newline."`
+		//VArg
 	}
 	_, err := flags.ParseArgs(&options, os.Args[1:])
 	if err != nil {
@@ -19,6 +20,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	//VCode
 	ending := '\n'
 	for _, str := range os.Environ() {
 		if str[:2] != "_=" {

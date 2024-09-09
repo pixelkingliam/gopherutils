@@ -14,7 +14,7 @@ func main() {
 		NoCreate         bool `short:"c" long:"no-create" description:"Does not create any files."` // GNU Compatible
 		AccessOnly       bool `short:"a"  description:"Only changes the access time"`               // GNU Compatible
 		ModificationOnly bool `short:"m"  description:"Only changes the modification time"`         // GNU Compatible
-
+		//VArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 
@@ -25,6 +25,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	//VCode
 	if len(args) == 1 {
 		fmt.Println("Missing file operand")
 		os.Exit(1)

@@ -20,6 +20,7 @@ func main() {
 	var options struct {
 		Silent bool `short:"s" long:"silent" description:"print nothing, only return an exit status"`
 		Quiet  bool `short:"q" long:"quiet" description:"same as -s"`
+		//VArg
 	}
 
 	_, err := flags.ParseArgs(&options, os.Args[1:])
@@ -30,6 +31,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	//VCode
 	if options.Quiet {
 		options.Silent = true
 	}
