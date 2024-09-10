@@ -26,7 +26,7 @@ if [ $RELEASE == true ]; then
 else
     FINAL_VERSION="$VERSION_NUMBER ($GIT_HASH)"
 fi
-echo -e $FINAL_VERSION
+echo -e "Building for Version $FINAL_VERSION"
 
 # Function to calculate MD5 hash of a file
 calculate_md5() {
