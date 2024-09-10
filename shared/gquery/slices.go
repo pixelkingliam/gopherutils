@@ -87,3 +87,38 @@ func All[T comparable](slice []T, value T) int {
 	}
 	return count
 }
+
+func Any[T comparable](slice []T, value T) bool {
+	if len(slice) == 0 {
+		return false
+	}
+	for _, t := range slice {
+		if t == value {
+			return true
+		}
+	}
+	return false
+}
+
+func AnyContains[T comparable](slice [][]T, subSlice []T) bool {
+	if len(slice) == 0 {
+		return false
+	}
+	if len(subSlice) == 0 {
+		return true
+	}
+
+	// Iterate over each slice in slice
+	for k := 0; k < len(slice); k++ {
+		currentSlice := slice[k]
+
+		// We only need to iterate to len(currentSlice) - len(subSlice) + 1
+		for i := 0; i <= len(currentSlice)-len(subSlice); i++ {
+			if slices.Equal(currentSlice[i:i+len(subSlice)], subSlice) {
+				return true
+			}
+		}
+	}
+
+	return false
+}

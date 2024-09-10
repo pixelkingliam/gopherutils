@@ -84,6 +84,20 @@ func main() {
 	} else {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.IsDigit(c uint8) bool")
 	}
+	// Testing Any
+	result = testAny()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.Any[T comparable](slice []T, value T) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.Any[T comparable](slice []T, value T) bool")
+	}
+	// Testing AnyContains
+	result = testAnyContains()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.AnyContains[T comparable](slice [][]T, subSlice []T) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.AnyContains[T comparable](slice [][]T, subSlice []T) bool")
+	}
 	gqueryResults = append(gqueryResults, result)
 	failures := gquery.All(gqueryResults, false)
 	if failures == 0 {
@@ -275,7 +289,52 @@ func testIsDigit() bool {
 	}
 	return true
 }
+func testAny() bool {
+	slice1d := []string{
+		"apple",
+		"application",
+		"App",
+		"elderberry",
+		"fig",
+		"grape",
+		"honeydew",
+		"kiwi",
+		"lemon",
+		"mango",
+		"nectarine",
+		"orange"}
+	if !gquery.Any(slice1d, "apple") {
+		return false
+	}
+	if gquery.Any(slice1d, "no-exists") {
+		return false
+	}
+	return true
 
+}
+func testAnyContains() bool {
+	slice1d := [][]rune{
+		[]rune("apple"),
+		[]rune("application"),
+		[]rune("App"),
+		[]rune("elderberry"),
+		[]rune("fig"),
+		[]rune("grape"),
+		[]rune("honeydew"),
+		[]rune("kiwi"),
+		[]rune("lemon"),
+		[]rune("mango"),
+		[]rune("nectarine"),
+		[]rune("orange")}
+	if !gquery.AnyContains(slice1d, []rune("ki")) {
+		return false
+	}
+	if gquery.AnyContains(slice1d, []rune("kiwi_nectar")) {
+		return false
+	}
+	return true
+
+}
 func testDynamicBoxGrid() bool {
 	slice1d := []string{
 		"apple",
@@ -657,3 +716,8 @@ func testToSI() bool {
 	}
 	return true
 }
+
+/*
+	//VArg
+	//VCode
+*/
