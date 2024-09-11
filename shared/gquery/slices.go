@@ -78,7 +78,7 @@ func QuickSortLen(slice []string) []string {
 	//    return    =    QuickSortLen(left) +    Pivot    + QuickSortLen(right)
 	return append(append(QuickSortLen(left), slice[pivot]), QuickSortLen(right)...)
 }
-func All[T comparable](slice []T, value T) int {
+func Count[T comparable](slice []T, value T) int {
 	count := 0
 	for i := 0; i < len(slice); i++ {
 		if slice[i] == value {

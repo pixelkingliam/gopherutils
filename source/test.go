@@ -46,11 +46,11 @@ func main() {
 	}
 	gqueryResults = append(gqueryResults, result)
 	// Testing All
-	result = testAll()
+	result = testCount()
 	if result {
-		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, value T) int")
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.Count[T comparable](slice []T, value T) int")
 	} else {
-		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, value T) int")
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.Count[T comparable](slice []T, value T) int")
 	}
 	gqueryResults = append(gqueryResults, result)
 	// Testing EndsWith
@@ -99,7 +99,7 @@ func main() {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.AnyContains[T comparable](slice [][]T, subSlice []T) bool")
 	}
 	gqueryResults = append(gqueryResults, result)
-	failures := gquery.All(gqueryResults, false)
+	failures := gquery.Count(gqueryResults, false)
 	if failures == 0 {
 		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> gquery")
 	} else {
@@ -142,7 +142,7 @@ func main() {
 	}
 	displayResults = append(displayResults, result)
 
-	failures = gquery.All(displayResults, false)
+	failures = gquery.Count(displayResults, false)
 	if failures == 0 {
 		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> convert")
 	} else {
@@ -214,7 +214,7 @@ func main() {
 	}
 	convertResults = append(convertResults, result)
 
-	failures = gquery.All(convertResults, false)
+	failures = gquery.Count(convertResults, false)
 	if failures == 0 {
 		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> convert")
 	} else {
@@ -242,9 +242,9 @@ func testQuick() bool {
 	expected := []string{"x", "hi", "one", "hell", "fiver", "bottle", "process", "laughter", "wateracup"}
 	return slices.Equal(mySlice, expected)
 }
-func testAll() bool {
+func testCount() bool {
 	mySlice := []string{"hi", "hi", "hell", "process", "x", "one", "wateracup", "bottle", "fiver"}
-	result := gquery.All(mySlice, "hi")
+	result := gquery.Count(mySlice, "hi")
 	return result == 2
 }
 func testEndsWith() bool {
