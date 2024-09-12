@@ -122,3 +122,18 @@ func AnyContains[T comparable](slice [][]T, subSlice []T) bool {
 
 	return false
 }
+
+func Equals2D[T comparable](a [][]T, b [][]T) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if len(a[i]) != len(b[i]) {
+			return false
+		}
+		if !slices.Equal(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
+}

@@ -213,6 +213,21 @@ func main() {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.ToSI(value int64) string")
 	}
 	convertResults = append(convertResults, result)
+	// Testing RunifyString
+	result = testRunifyString()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.RunifyString(str string) []rune")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.RunifyString(str string) []rune]")
+	}
+	convertResults = append(convertResults, result)
+	// Testing RunifyString
+	result = testRunifyStrings()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> convert.RunifyStrings(strings []string) [][]rune")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> convert.RunifyStrings(strings []string) [][]rune]")
+	}
 
 	failures = gquery.Count(convertResults, false)
 	if failures == 0 {
@@ -712,6 +727,34 @@ func testToSI() bool {
 		return false
 	}
 	if convert.ToSI(1000000, true) != "1 MB" {
+		return false
+	}
+	return true
+}
+func testRunifyString() bool {
+	arr1d1 := []rune{'h', 'i'}
+	arr1d2 := []rune{'h', 'e', 'l', 'l', 'o'}
+	if !slices.Equal(arr1d1, convert.RunifyString("hi")) {
+		return false
+	}
+	if !slices.Equal(arr1d2, convert.RunifyString("hello")) {
+		return false
+	}
+	return true
+}
+func testRunifyStrings() bool {
+	expectedRunes := [][]rune{
+		{'a', 'b', 'c'},
+		{'d', 'e', 'f'},
+		{'g', 'h', 'i'},
+	}
+	strings := []string{
+		"abc",
+		"def",
+		"ghi",
+	}
+
+	if !gquery.Equals2D(expectedRunes, convert.RunifyStrings(strings)) {
 		return false
 	}
 	return true
