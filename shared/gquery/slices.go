@@ -122,7 +122,20 @@ func AnyContains[T comparable](slice [][]T, subSlice []T) bool {
 
 	return false
 }
-
+func All[T comparable](slice []T, comparator T) bool {
+	if len(slice) == 0 {
+		return false
+	}
+	for _, val := range slice {
+		if comparator != val {
+			return false
+		}
+	}
+	return true
+}
+func IsEmpty[T any](slice []T) bool {
+	return len(slice) == 0
+}
 func Equals2D[T comparable](a [][]T, b [][]T) bool {
 	if len(a) != len(b) {
 		return false

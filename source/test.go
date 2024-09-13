@@ -99,6 +99,22 @@ func main() {
 		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.AnyContains[T comparable](slice [][]T, subSlice []T) bool")
 	}
 	gqueryResults = append(gqueryResults, result)
+	// Testing AnyContains
+	result = testAll()
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, comparator T) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.All[T comparable](slice []T, comparator T) bool")
+	}
+	gqueryResults = append(gqueryResults, result)
+	// Testing IsEmpty
+	result = gquery.IsEmpty(make([]uint8, 0))
+	if result {
+		fmt.Println(ansi.GreenFG+"[ TEST PASSED ]"+ansi.ResetColor, "=> gquery.IsEmpty[T any](slice []) bool")
+	} else {
+		fmt.Println(ansi.RedFG+"[ TEST FAILED ]"+ansi.ResetColor, "=> gquery.IsEmpty[T any](slice []) bool")
+	}
+	gqueryResults = append(gqueryResults, result)
 	failures := gquery.Count(gqueryResults, false)
 	if failures == 0 {
 		fmt.Println(ansi.GreenFG+"[ ALL TESTS PASS ]"+ansi.ResetColor, "=> gquery")
@@ -345,6 +361,24 @@ func testAnyContains() bool {
 		return false
 	}
 	if gquery.AnyContains(slice1d, []rune("kiwi_nectar")) {
+		return false
+	}
+	return true
+
+}
+func testAll() bool {
+	slice1 := []string{
+		"apple",
+		"application",
+		"App"}
+	slice2 := []string{
+		"apple",
+		"apple",
+		"apple"}
+	if gquery.All(slice1, "apple") {
+		return false
+	}
+	if !gquery.All(slice2, "apple") {
 		return false
 	}
 	return true
