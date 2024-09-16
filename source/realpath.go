@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"gopherutils/shared/convert"
+	"gopherutils/shared/gquery"
 	"os"
 	"strings"
 )
@@ -11,15 +13,21 @@ import (
 func main() {
 
 	var options struct {
-		Zero           bool `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Compatible
-		CanonMissing   bool `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Compatible
-		CanonExisting  bool `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Compatible
-		NoSymlink      bool `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Compatible
-		NoSymlinkExtra bool `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Compatible
-		Physical       bool `short:"P" long:"physical" description:"Resolves symlinks as encountered. (Default)"`                                // GNU Compatible
-		Logical        bool `short:"L" long:"logical" description:"Resolves '..' components before symlinks"`                                    // GNU Compatible
+		Zero           bool   `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Compatible
+		CanonMissing   bool   `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Compatible
+		CanonExisting  bool   `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Compatible
+		NoSymlink      bool   `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Compatible
+		NoSymlinkExtra bool   `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Compatible
+		Physical       bool   `short:"P" long:"physical" description:"Resolves symlinks as encountered. (Default)"`                                // GNU Compatible
+		Logical        bool   `short:"L" long:"logical" description:"Resolves '..' components before symlinks"`                                    // GNU Compatible
+		RelativeDir    string `short:"b" long:"relative-base" description:"Calculates the relative path from one directory to another"`            // GNU Compatible
 		//VArg
 	}
+	usingRelativeBase := false
+	if gquery.AnyContains(convert.RunifyStrings(os.Args), convert.RunifyString("-b")) || gquery.AnyContains(convert.RunifyStrings(os.Args), convert.RunifyString("--relative-base")) {
+		usingRelativeBase = true
+	}
+	//options.RelativeDir = fmt.Sprintf(string(deadBeef))
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
 		args = args[1:]
@@ -44,6 +52,7 @@ func main() {
 	for _, fakePath := range args {
 		final := make([]string, 0)
 		var skipParentComp = false
+
 		if fakePath[0] != '/' {
 			pwd, err := os.Getwd()
 			if err != nil {
@@ -52,6 +61,7 @@ func main() {
 			}
 			final = strings.Split(pwd, "/")
 		}
+
 		for i, str := range strings.Split(fakePath, "/") {
 			if str == "" {
 				continue
@@ -64,7 +74,7 @@ func main() {
 				if i == 0 {
 					continue
 				}
-				_, err := os.Stat(formPath(final, fakePath[len(fakePath)-1] == '/'))
+				_, err := os.Stat(formPath(final, fakePath[len(fakePath)-1] == '/', false))
 				if err != nil && !options.CanonMissing {
 					fmt.Printf("Error: %v\n", err)
 					return
@@ -73,19 +83,18 @@ func main() {
 				continue
 			}
 			path := append(final, str)
-			lstat, err := os.Lstat(formPath(path, fakePath[len(fakePath)-1] == '/'))
+			lstat, err := os.Lstat(formPath(path, fakePath[len(fakePath)-1] == '/', false))
 			if err != nil {
-				fmt.Println(path)
-				fmt.Println(final)
+
 				if options.CanonExisting {
-					fmt.Printf("File or Directory '%s' does not exist!\n", formPath(path, fakePath[len(fakePath)-1] == '/'))
+					fmt.Printf("File or Directory '%s' does not exist!\n", formPath(path, fakePath[len(fakePath)-1] == '/', false))
 					return
 				}
 				final = path
 				continue
 			}
 			if lstat.Mode()&os.ModeSymlink != 0 && !options.NoSymlink {
-				target, err := os.Readlink(formPath(path, fakePath[len(fakePath)-1] == '/'))
+				target, err := os.Readlink(formPath(path, fakePath[len(fakePath)-1] == '/', false))
 				if err != nil {
 					fmt.Printf("Error getting symlink location: %v\n", err)
 					return
@@ -103,11 +112,35 @@ func main() {
 				final = path
 			}
 		}
-
-		fmt.Printf("%s%s", formPath(final, fakePath[len(fakePath)-1] == '/'), terminator)
+		isDir := fakePath[len(fakePath)-1] == '/'
+		isRelative := false
+		if usingRelativeBase {
+			final = relativePathBase(options.RelativeDir, final)
+			isDir = false
+			isRelative = true
+		}
+		fmt.Printf("%s%s", formPath(final, isDir, isRelative), terminator)
 	}
 }
-func formPath(components []string, isDir bool) string {
+func relativePathBase(dir string, path []string) []string {
+	if dir[len(dir)-1] == '/' {
+		dir = dir[:len(dir)-1]
+	}
+	dirComp := strings.Split(dir, "/")
+	// Remove shared components
+	i := 0
+	for i < len(dirComp) && i < len(path) && dirComp[i] == path[i] {
+		i++
+	}
+	dirCompNew := dirComp[i:] // Remaining part of the dir after the common prefix
+	pathNew := path[i:]       // Remaining part of the target path after the common prefix
+	// Negate <dir>
+	for i, _ := range dirCompNew {
+		dirCompNew[i] = ".."
+	}
+	return append(dirCompNew, pathNew...)
+}
+func formPath(components []string, isDir bool, isRelative bool) string {
 	sorted := make([]string, 0)
 	for _, str := range components {
 		if str != "" {
@@ -115,7 +148,10 @@ func formPath(components []string, isDir bool) string {
 		}
 	}
 	components = sorted
-	result := "/"
+	result := ""
+	if !isRelative {
+		result = "/"
+	}
 	for _, component := range components {
 		result += component
 		result += "/"
