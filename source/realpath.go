@@ -13,19 +13,26 @@ import (
 func main() {
 
 	var options struct {
-		Zero           bool   `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                            // GNU Compatible
-		CanonMissing   bool   `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."` // GNU Compatible
-		CanonExisting  bool   `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`        // GNU Compatible
-		NoSymlink      bool   `short:"s" long:"strip" description:"Ignores symlinks."`                                                             // GNU Compatible
-		NoSymlinkExtra bool   `short:"S" long:"no-symlinks" description:"Same as -s."`                                                             // GNU Compatible
-		Physical       bool   `short:"P" long:"physical" description:"Resolves symlinks as encountered. (Default)"`                                // GNU Compatible
-		Logical        bool   `short:"L" long:"logical" description:"Resolves '..' components before symlinks"`                                    // GNU Compatible
-		RelativeDir    string `short:"b" long:"relative-base" description:"Calculates the relative path from one directory to another"`            // GNU Compatible
+		Zero           bool   `short:"z" long:"zero" description:"Ends each output line with NUL, instead of newline."`                                                        // GNU Compatible
+		CanonMissing   bool   `short:"m" long:"canonicalize-missing" description:"Suppresses error messages associated with missing directories."`                             // GNU Compatible
+		CanonExisting  bool   `short:"e" long:"canonicalize-existing" description:"Throws error if any component of the path don't exist."`                                    // GNU Compatible
+		NoSymlink      bool   `short:"s" long:"strip" description:"Ignores symlinks."`                                                                                         // GNU Compatible
+		NoSymlinkExtra bool   `short:"S" long:"no-symlinks" description:"Same as -s."`                                                                                         // GNU Compatible
+		Physical       bool   `short:"P" long:"physical" description:"Resolves symlinks as encountered. (Default)"`                                                            // GNU Compatible
+		Logical        bool   `short:"L" long:"logical" description:"Resolves '..' components before symlinks"`                                                                // GNU Compatible
+		RelativeDir    string `short:"b" long:"relative-base" description:"Calculates the relative path from one directory to another"`                                        // GNU Compatible
+		RelativeDirTo  string `short:"r" long:"relative-to" description:"Calculates the relative path from one directory to another. Processes symlinks in the relative path"` // GNU Compatible
 		//VArg
 	}
 	usingRelativeBase := false
+	// relative-to seems to have identical output to relative-base
+	usingTo := false
 	if gquery.AnyContains(convert.RunifyStrings(os.Args), convert.RunifyString("-b")) || gquery.AnyContains(convert.RunifyStrings(os.Args), convert.RunifyString("--relative-base")) {
 		usingRelativeBase = true
+	}
+	if gquery.AnyContains(convert.RunifyStrings(os.Args), convert.RunifyString("-r")) || gquery.AnyContains(convert.RunifyStrings(os.Args), convert.RunifyString("--relative-to")) {
+		usingRelativeBase = true
+		usingTo = true
 	}
 	//options.RelativeDir = fmt.Sprintf(string(deadBeef))
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -42,6 +49,9 @@ func main() {
 		}
 	}
 	//VCode
+	if usingTo {
+		options.RelativeDir = options.RelativeDirTo
+	}
 	if options.NoSymlinkExtra {
 		options.NoSymlink = true
 	}
