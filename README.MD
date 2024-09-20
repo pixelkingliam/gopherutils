@@ -142,7 +142,7 @@ See `LICENSE`
 
   ✔️ Advanced functionality
 
-  ❌ GNU Compatibility
+  ➗ GNU Compatibility
 * `rm`
 
   ❌ Basic functionality
