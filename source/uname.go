@@ -11,7 +11,8 @@ import (
 
 func main() {
 	var options struct {
-		KernelName bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"` // GNU Compatible
+		KernelName bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"`        // GNU Compatible
+		Hostname   bool `short:"n" long:"nodename" description:"Prints the computer's network name."` // GNU Compatible
 		//VArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -37,6 +38,16 @@ func main() {
 			kernelName = fmt.Sprintf("%c%s", unicode.ToUpper(rune(kernelName[0])), kernelName[1:])
 		}
 		fmt.Print(kernelName)
+		fmt.Print(" ")
+	}
+	if options.Hostname {
+		hostname, err := os.Hostname()
+		if err != nil {
+			fmt.Printf("Error getting hostname: %v\n", err)
+		}
+		fmt.Print(hostname)
+		fmt.Print(" ")
+
 	}
 	fmt.Println()
 }
