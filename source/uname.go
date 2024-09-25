@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"gopherutils/shared/osdep"
 	"os"
 	"runtime"
 	"unicode"
@@ -11,8 +12,9 @@ import (
 
 func main() {
 	var options struct {
-		KernelName bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"`        // GNU Compatible
-		Hostname   bool `short:"n" long:"nodename" description:"Prints the computer's network name."` // GNU Compatible
+		KernelName bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"`               // GNU Compatible
+		Hostname   bool `short:"n" long:"nodename" description:"Prints the computer's network name."`        // GNU Compatible
+		Release    bool `short:"r" long:"kernel-release" description:"Prints the kernel's release version."` // GNU Compatible
 		//VArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -47,7 +49,14 @@ func main() {
 		}
 		fmt.Print(hostname)
 		fmt.Print(" ")
-
+	}
+	if options.Release {
+		kernelVer, err := osdep.GetKernelVersion()
+		if err != nil {
+			fmt.Printf("Error getting kernel release version: %v\n", err)
+		}
+		fmt.Print(kernelVer)
+		fmt.Print(" ")
 	}
 	fmt.Println()
 }
