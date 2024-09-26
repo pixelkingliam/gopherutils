@@ -651,7 +651,7 @@ See `LICENSE`
   ✔️ GNU Compatibility
 * `uname`
 
-  ❌ Basic functionality
+  ✔️ Basic functionality
 
   ❌ Advanced functionality
 

@@ -3,7 +3,7 @@ $hashDir = "$env:TEMP\go_build_hashes"
 if (-not (Test-Path $hashDir)) {
     New-Item -Path $hashDir -ItemType Directory | Out-Null
 }
-
+Write-Host "BUILD.PS1 IS DEPRECATED! USE BUILD.SH THROUGH WSL."
 # Flag for force rebuild
 $forceRebuild = $false
 

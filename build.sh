@@ -57,6 +57,7 @@ for file in source/*.go; do
 
     cp "$file" "$BUILD_DIR/$filename"
     sed -e 's|//VArg|Version         bool `short:"v" long:"version" description:"Shows program version."\`|' \
+        -e 's|//SafeVArg|Version         bool `long:"version" description:"Shows program version."\`|' \
         -e "s|//VCode|if (options.Version) {\n    println(\"$filename_no_ext (Gopherutils) $FINAL_VERSION\\\\nCopyright © $YEAR Pixel\\\\nLicense MIT: MIT License <https://opensource.org/license/mit>\\\\n\\\\nWritten by Pixel\")\n return}|" \
         "$file" > "$BUILD_DIR/$filename"
     echo -e "[BUILD.SH]=> Compiling ${file}"
