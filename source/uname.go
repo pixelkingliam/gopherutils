@@ -7,6 +7,7 @@ import (
 	"gopherutils/shared/osdep"
 	"os"
 	"runtime"
+	"strings"
 	"unicode"
 )
 
@@ -15,7 +16,8 @@ func main() {
 		KernelName bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"`               // GNU Compatible
 		Hostname   bool `short:"n" long:"nodename" description:"Prints the computer's network name."`        // GNU Compatible
 		Release    bool `short:"r" long:"kernel-release" description:"Prints the kernel's release version."` // GNU Compatible
-		//VArg
+		BuildDate  bool `short:"v" description:"Prints the kernel's build date."`                            // GNU Compatible
+		//SafeVArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
 	if len(args) != 0 {
@@ -58,5 +60,19 @@ func main() {
 		fmt.Print(kernelVer)
 		fmt.Print(" ")
 	}
-	fmt.Println()
+	if options.BuildDate {
+		if runtime.GOOS == "linux" {
+			file, err := os.ReadFile("/proc/version")
+			strFile := string(file)
+			strFile = strFile[strings.Index(strFile, "#"):]
+			if err != nil {
+				return
+			}
+			fmt.Print(strFile)
+		} else {
+			fmt.Print("unknown")
+		}
+		fmt.Print("\b ")
+	}
+	fmt.Println("\b")
 }
