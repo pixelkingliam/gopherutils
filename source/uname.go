@@ -13,10 +13,11 @@ import (
 
 func main() {
 	var options struct {
-		KernelName bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"`               // GNU Compatible
-		Hostname   bool `short:"n" long:"nodename" description:"Prints the computer's network name."`        // GNU Compatible
-		Release    bool `short:"r" long:"kernel-release" description:"Prints the kernel's release version."` // GNU Compatible
-		BuildDate  bool `short:"v" description:"Prints the kernel's build date."`                            // GNU Compatible
+		KernelName  bool `short:"s" long:"kernel-name" description:"Prints the kernel's name'"`               // GNU Compatible
+		Hostname    bool `short:"n" long:"nodename" description:"Prints the computer's network name."`        // GNU Compatible
+		Release     bool `short:"r" long:"kernel-release" description:"Prints the kernel's release version."` // GNU Compatible
+		BuildDate   bool `short:"v" description:"Prints the kernel's build date."`                            // GNU Compatible
+		MachineArch bool `short:"m" long:"machine" description:"Prints the computer's architecture."`         // GNU Compatible
 		//SafeVArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -73,6 +74,10 @@ func main() {
 			fmt.Print("unknown")
 		}
 		fmt.Print("\b ")
+	}
+	if options.MachineArch {
+		fmt.Print(runtime.GOARCH)
+		fmt.Print(" ")
 	}
 	fmt.Println("\b")
 }
