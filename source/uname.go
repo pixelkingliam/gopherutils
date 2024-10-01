@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"github.com/shirou/gopsutil/cpu"
 	"gopherutils/shared/osdep"
 	"os"
 	"runtime"
@@ -18,6 +19,7 @@ func main() {
 		Release     bool `short:"r" long:"kernel-release" description:"Prints the kernel's release version."` // GNU Compatible
 		BuildDate   bool `short:"v" description:"Prints the kernel's build date."`                            // GNU Compatible
 		MachineArch bool `short:"m" long:"machine" description:"Prints the computer's architecture."`         // GNU Compatible
+		Processor   bool `short:"p" long:"processor" description:"Prints the computer's CPU."`                // GNU Incompatible
 		//SafeVArg
 	}
 	args, err := flags.ParseArgs(&options, os.Args)
@@ -69,14 +71,24 @@ func main() {
 			if err != nil {
 				return
 			}
-			fmt.Print(strFile)
+			fmt.Print(strings.Replace(strFile, "\n", "", -1))
 		} else {
 			fmt.Print("unknown")
 		}
-		fmt.Print("\b ")
+		fmt.Print(" ")
 	}
 	if options.MachineArch {
 		fmt.Print(runtime.GOARCH)
+		fmt.Print(" ")
+	}
+	if options.Processor {
+		info, err := cpu.Info()
+		if err != nil {
+			fmt.Printf("Error getting CPU: %v\n", err)
+			return
+		}
+
+		fmt.Printf(info[0].ModelName)
 		fmt.Print(" ")
 	}
 	fmt.Println("\b")
